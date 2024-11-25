@@ -36,6 +36,7 @@ from datetime import datetime
 from textwrap import dedent
 from pydantic import BaseModel
 import re
+import getpass
 from config import (DB_NAME,CONFIG_SQL_DB,METADATA_FILE_PATH,BOT_NAME,
                     SQL_CHUNK_TABLE,SQL_VOCAB_BM25_TABLE,
                     MAX_TOKENS,SUFFIX,INDEX_NAME,
@@ -44,13 +45,17 @@ from config import (DB_NAME,CONFIG_SQL_DB,METADATA_FILE_PATH,BOT_NAME,
                     SQL_USER_TABLE_SCHEMA,SQL_USER_TABLE,
                     SQL_MESSAGES_TABLE,SQL_MESSAGES_TABLE_SCHEMA,
                     SQL_PROMPTS_TABLE,SQL_PROMPTS_TABLE_SCHEMA,
-                    MX_RESULTS,DIST_THRESHOLD,MX_RESULTS_QUERY)
+                    MX_RESULTS,DIST_THRESHOLD,MX_RESULTS_QUERY,USERS_SERVERS)
 
 load_dotenv()
 
-#API_KEY = os.getenv('API_KEY')
+
 API_KEY_CGPT = os.getenv('API_KEY_CGPT')
-API_KEY_TG = os.getenv('API_KEY_TG_BBOT')
+if getpass.getuser() in USERS_SERVERS:
+    API_KEY_TG = os.getenv('API_KEY_TG')
+else:
+    API_KEY_TG = os.getenv('API_KEY_TG_BBOT')
+del getpass
 AUTH_TELEBOT_PWD = os.getenv('AUTH_TELEBOT_PWD')
 API_PINE_CONE = os.getenv('API_PINE_CONE')
 

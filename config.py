@@ -47,6 +47,8 @@ TABLE_STORE_DIR = 'data/storage/tables'
 
 METADATA_FILE_PATH = f'{METADATA_DIR}/Files_date_version.csv'
 
+USERS_SERVERS = ['root','ubuntu']
+
 # Bot CONFIG
 
 BOT_NAME = 'THWS Bau Bot'
