@@ -36,6 +36,8 @@ if not sql_con.check_table_exists(SQL_VOCAB_BM25_TABLE):
 
     else:
         print("JSON file not found")
+else:
+    success+=1
 
 
 if not sql_con.check_table_exists(SQL_CHUNK_TABLE):
@@ -55,5 +57,8 @@ if not sql_con.check_table_exists(SQL_CHUNK_TABLE):
     
     else:
         print(f"JSON file {table_name} not found")
+
+else:
+    success+=1
 
 print(f"DB Checkup completed {success}/{success_exp}")
