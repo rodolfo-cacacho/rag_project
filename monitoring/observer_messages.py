@@ -2,10 +2,8 @@
 import telebot
 from datetime import datetime
 from threading import Timer
-from database_manager import MySQLDB
 from dotenv import load_dotenv
 import os
-
 
 load_dotenv()
 

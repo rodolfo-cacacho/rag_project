@@ -1,6 +1,6 @@
 import os
 import sys
-
+print("Running Monitoring!")
 # Correct computation of project root to align with the actual directory
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 print("Computed project root:", project_root)
