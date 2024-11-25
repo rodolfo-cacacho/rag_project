@@ -32,12 +32,12 @@ class EmbeddingHandler:
             task (str): Task to specify for models supporting tasks like "retrieval.query".
         
         Returns:
-            list: List of embeddings.
+            list: List of embeddings, with all values as Python floats.
         """
         if self.use_api:
             if not self.api_function:
                 raise ValueError("API function must be defined for API embedding.")
-            return [self.api_function(text) for text in texts]
+            return [[float(value) for value in self.api_function(text)] for text in texts]
 
         if not self.embedding_model:
             raise ValueError("Transformer model must be loaded for local embedding.")
@@ -47,7 +47,7 @@ class EmbeddingHandler:
 
         if task_to_use:
             # Encode with task-specific arguments
-            return self.embedding_model.encode(
+            embeddings = self.embedding_model.encode(
                 texts,
                 task=task_to_use,
                 prompt_name=task_to_use,
@@ -56,8 +56,11 @@ class EmbeddingHandler:
             )
         else:
             # Default encoding without task
-            return self.embedding_model.encode(
+            embeddings = self.embedding_model.encode(
                 texts,
                 batch_size=16,
                 show_progress_bar=False
             )
+
+        # Ensure all embedding values are converted to Python floats
+        return [[float(value) for value in embedding] for embedding in embeddings]
