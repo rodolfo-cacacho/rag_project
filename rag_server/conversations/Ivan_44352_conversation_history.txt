@@ -1,0 +1,70 @@
+[2024-06-13 12:32:35.937052] user: /start
+[2024-06-13 12:32:36.168341] assistant: Welcome Ivan to THWS Bau Bot! Type something to start chatting.
+[2024-07-05 13:06:20.091917] user: /start
+[2024-07-05 13:06:20.323355] assistant: Welcome Ivan to THWS Bau Bot! Type something to start chatting.
+[2024-07-05 13:06:44.581223] user: /reset
+[2024-07-05 13:06:44.781551] assistant: Resetting your conversation history!
+[2024-07-05 13:06:49.378506] user: /getaccess
+[2024-07-05 13:06:49.542150] assistant: Welcome Ivan to THWS Bau Bot! You are not allowed to chat, please enter the password to gain access to the bot.
+[2024-07-05 13:08:22.229262] user: /start
+[2024-07-05 13:08:22.374056] assistant: Welcome Ivan to THWS Bau Bot! Type something to start chatting.
+[2024-07-05 13:08:27.290996] assistant: Incorrect password! Try again! Send /cancel to stop requesting access!
+[2024-07-05 13:08:32.872194] assistant: Incorrect password! Try again! Send /cancel to stop requesting access!
+[2024-07-05 13:08:45.487551] user: /cancel
+[2024-07-05 13:08:45.641679] assistant: Operation canceled!
+[2024-07-05 13:08:51.108018] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-07-05 13:08:53.754131] user: /getaccess
+[2024-07-05 13:08:53.906228] assistant: Welcome Ivan to THWS Bau Bot! You are not allowed to chat, please enter the password to gain access to the bot.
+[2024-07-05 13:08:55.570501] assistant: Correct password! You can now chat with THWS Bau Bot!
+[2024-07-05 13:10:00.842361] user: Welche Voraussetzungen müssen für die Förderung von gemischt genutzten Gebäuden erfüllt sein? (in 2021)
+[2024-07-05 13:10:45.855183] user: Wie hoch ist die Förderung für den Austausch einer Gasheizung gegen eine Wärmepumpe
+[2024-07-05 13:11:44.522734] user: Was sind die technischen Anforderungen für die Konnektivität von Heizungsanlagen?
+[2024-07-05 13:19:27.134715] user: Hall!
+[2024-07-05 13:19:27.280716] assistant: Your message is too short for me to understand. Please provide more information.
+[2024-07-05 13:19:35.213176] user: Was sind die technischen Anforderungen für die Konnektivität von Heizungsanlagen?
+[2024-07-05 13:19:41.598599] assistant: Die technischen Anforderungen für die Konnektivität von Heizungsanlagen sind wie folgt:
+
+Grundsätzlich besteht eine Verpflichtung, einen geförderten Wärmeerzeuger an das Internet anzuschließen. Es gibt jedoch Ausnahmen, in denen von dieser Verpflichtung abgewichen werden kann:
+- Es besteht keine technische Schnittstelle am Wärmeerzeuger (kabelgebunden oder kabellos).
+- Der Antragsteller und/oder der Anlagenbetreiber haben keinen eigenen Internetanschluss/-vertrag im Aufstellgebäude des Wärmeerzeugers (z. B. Mietshaus, Telefonvertrag ohne Internet) oder der Wärmeerzeuger ist außerhalb des Gebäudes aufgestellt (z. B. Gebäudenetz).
+- Die Verlegung von Netzwerkkabeln durch nicht vom Antragsteller und/oder Anlagenbetreiber bewohnte Räume ist notwendig. Gleichzeitig ist der Aufstellort des Wärmeerzeugers nicht durch ein WLAN-Signal erreichbar (Beispiel: abgeschirmte Räume oder externe Störfrequenzen). Die Notwendigkeit eines Repeaters ist kein Abweichungsgrund. Eine mobile Datenverbindung muss nicht genutzt werden.
+
+Quelle: Daten KI/Technische FAQ BEG EM, csv, Technische_FAQ_BEG_EM_5_(2023-03-13).csv
+[2024-07-05 13:20:28.311010] user: Gibt es weirere askekte?
+[2024-07-05 13:20:30.672198] assistant: Es tut mir leid, aber mit den bereitgestellten Informationen im Kontext kann ich deine Frage nicht beantworten. Bitte gib mehr Details oder weitere Informationen an.
+
+Quelle: Fehlender Kontext
+[2024-07-05 13:20:47.797930] user: Welche Voraussetzungen müssen für die Förderung von gemischt genutzten Gebäuden erfüllt sein? (in 2021)
+[2024-07-05 13:20:52.431069] assistant: Die Voraussetzungen für die Förderung von gemischt genutzten Gebäuden in 2021 sind:
+
+1. **Wärmeerzeugung**: Der Anschluss an ein Gebäudenetz ist nur förderfähig, wenn die Wärmeerzeugung des Netzes zu mindestens 25% durch erneuerbare Energien (EE-Anteil) und/oder durch unvermeidbare Abwärme erfolgt (Quelle 2).
+
+2. **Nutzung**: Das Gebäude muss zu überwiegend (mehr als 50 %) zu Nichtwohnzwecken genutzt werden. Ist der Wohnnutzungsanteil (z. B. Hausmeisterwohnung) unerheblich (in der Regel bis zu 10 %), muss das Gebäude insgesamt als Nichtwohngebäude behandelt werden (Quelle 3).
+
+Weitere Details sind in der Richtlinie des Förderprogramms zu finden (Quelle 7).
+
+Quelle: Technische FAQ BEG EM/csv/Technische_FAQ_BEG_EM_3_(2021-10-21).csv
+[2024-07-05 13:21:34.348635] user: Welche Voraussetzungen hatten wir in 2018
+[2024-07-05 13:22:15.258099] user: Welche Voraussetzungen haben wir in 2024
+[2024-07-05 13:22:17.796629] assistant: I don't know. The provided context does not offer specific information about the prerequisites or requirements for the year 2024.
+
+Quelle: Daten KI/Technische FAQ BEG EM/csv/Technische_FAQ_BEG_EM_5_(2023-03-13).csv
+[2024-07-05 13:22:32.525863] user: Die Voraussetzungen für die Förderung von gemischt genutzten Gebäuden in 2024?
+[2024-07-05 13:22:35.968078] assistant: Die Voraussetzungen für die Förderung von gemischt genutzten Gebäuden in 2024 sind nicht explizit im gegebenen Kontext beschrieben. Der angegebene Kontext beschäftigt sich hauptsächlich mit Unterscheidungen zwischen Nichtwohn- und Wohngebäuden sowie spezifischen technischen Anforderungen und Regelungen. Daher kann ich die Frage basierend auf den bereitgestellten Informationen nicht beantworten.
+
+Quelle: Daten KI/Technische FAQ BEG EM/csv/Technische_FAQ_BEG_EM_5_(2023-03-13).csv
+[2024-07-05 13:24:26.419339] user: Die Voraussetzungen für die Förderung von gemischt genutzten Gebäuden in 2023?
+[2024-07-05 13:24:30.435523] assistant: Die Voraussetzungen für die Förderung von gemischt genutzten Gebäuden in 2023 sind:
+
+1. Das Gebäude muss überwiegend (zu mehr als 50 % der beheizten oder gekühlten Nettogrundfläche) zu Nichtwohnzwecken genutzt werden. In diesem Fall wird das Gebäude als Nichtwohngebäude behandelt.
+2. Ist der Flächenanteil der Wohnnutzung (z. B. Hausmeisterwohnung) unerheblich (in der Regel bis zu 10 %), wird das gesamte Gebäude als Nichtwohngebäude betrachtet.
+
+Quelle: Daten KI/Technische FAQ BEG EM/csv/Technische_FAQ_BEG_EM_5_(2023-03-13).csv
+[2024-07-05 13:25:11.727166] user: Wie wird die Umwidmung unbeheizter Gebäude zu beheizten Nichtwohngebäuden gefördert?
+[2024-07-05 13:25:14.376566] assistant: Die Umwidmung eines bislang unbeheizten Gebäudes zu einem beheizten oder auch gekühlten Nichtwohngebäude wird in der Bundesförderung für effiziente Gebäude (BEG) im Bereich Neubau (NWG) gefördert.
+
+Quelle: Daten KI/Technische FAQ BEG EM/csv/Technische_FAQ_BEG_EM_5_(2023-03-13).csv
+[2024-07-05 13:25:36.214256] user: Wie war die Umwidmung unbeheizter Gebäude zu beheizten Nichtwohngebäuden in 2022 gefördert?
+[2024-07-05 13:25:38.978080] assistant: Im Jahr 2022 wurde die Umwidmung unbeheizter Gebäude zu beheizten Nichtwohngebäuden in der BEG NWG Neubau (Bundesförderung für effiziente Gebäude – Neubau) gefördert. Eine Förderung in der BEG EM (Einzelmaßnahmen) war für solche Umwidmungen nicht möglich.
+
+Quelle: Daten KI/Technische FAQ BEG EM/csv/Technische_FAQ_BEG_EM_4_(2022-08-15).csv

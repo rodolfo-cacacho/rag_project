@@ -1,0 +1,144 @@
+# RAG CONFIGURATIONS
+
+MAX_TOKENS = 250
+SUFFIX = 'clean'
+
+
+EMBEDDING_MODELS = {
+    "jinaai/jina-embeddings-v2-base-de":{"dimension":768,
+                                         "embed_task":None,
+                                         "retrieve_task":None,
+                                         "api_usage":False},
+    "jinaai/jina-embeddings-v3":{"dimension":1024,
+                                 "embed_task":"retrieval.passage",
+                                 "retrieve_task":"retrieval.query",
+                                 "api_usage":False},
+    "aari1995/German_Semantic_V3":{"dimension":1024,
+                                   "embed_task":None,
+                                   "retrieve_task":None,
+                                   "api_usage":False},
+    "intfloat/multilingual-e5-large-instruct":{"dimension":1024,
+                                   "embed_task":None,
+                                   "retrieve_task":None,
+                                   "api_usage":False}}
+
+EMBEDDING_MODEL = "aari1995/German_Semantic_V3"
+EMBEDDING_MODEL_NAME = EMBEDDING_MODEL.split("/")[1].replace('_','-').lower()
+EMBEDDING_MODEL_DIM = EMBEDDING_MODELS[EMBEDDING_MODEL]["dimension"]
+EMBEDDING_MODEL_API = EMBEDDING_MODELS[EMBEDDING_MODEL]["api_usage"]
+EMBEDDING_MODEL_RET_TASK = EMBEDDING_MODELS[EMBEDDING_MODEL]["retrieve_task"]
+ 
+INDEX_NAME = f'{EMBEDDING_MODEL_NAME}-{SUFFIX}-{MAX_TOKENS}'
+
+MX_RESULTS = 5
+DIST_THRESHOLD = 0.2
+
+MX_RESULTS_QUERY = 25
+
+ALPHA_VALUE = 0.7
+
+GEN_PROMPTS = 3
+
+# Directory & File CONFIG
+
+METADATA_DIR = 'data/documents/metadata'
+
+METADATA_FILE_PATH = f'{METADATA_DIR}/Files_date_version.csv'
+
+# Bot CONFIG
+
+BOT_NAME = 'THWS Bau Bot'
+
+# MySQL CONFIG
+CONFIG_SQL_DB = {
+    'user': 'root',
+    'password': 'admin123',
+    'host': 'localhost'
+}
+
+DB_NAME = 'data_rag'
+
+# SQL TABLES
+
+SQL_CHUNK_TABLE = f'chunks_table_{SUFFIX}_{MAX_TOKENS}'
+SQL_VOCAB_BM25_TABLE = f'vocabulary_bm25_{SUFFIX}_{MAX_TOKENS}'
+
+SQL_USER_TABLE = 'user_db'
+
+SQL_USER_TABLE_SCHEMA = {
+    'id': 'BIGINT PRIMARY KEY',
+    'username': 'VARCHAR(100) NULL',
+    'name': 'VARCHAR(100)',
+    'date_added': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+    'date_edit': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP',
+    'allowed': 'BOOLEAN DEFAULT FALSE'
+}
+
+
+SQL_MESSAGES_TABLE = 'messages'
+
+SQL_MESSAGES_TABLE_SCHEMA = {
+    'auto_message_id': 'BIGINT AUTO_INCREMENT PRIMARY KEY',
+    'chat_id': 'BIGINT NOT NULL',
+    'message_id': 'BIGINT NOT NULL',
+    'role': 'VARCHAR(10)',
+    'message': 'longtext NOT NULL',
+    'date': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+    'reply_message_id': 'BIGINT NULL',
+    'prompt_id': 'BIGINT NULL, FOREIGN KEY (prompt_id) REFERENCES prompts(prompt_id) ON DELETE SET NULL'
+}
+
+SQL_PROMPTS_TABLE = 'prompts'
+
+SQL_PROMPTS_TABLE_SCHEMA = {
+    'prompt_id': 'BIGINT AUTO_INCREMENT PRIMARY KEY',
+    'chat_id': 'BIGINT NOT NULL',
+    'question': 'longtext NOT NULL',
+    'context': 'longtext',
+    'question_w_context': 'longtext',
+    'answer': 'longtext',
+    'evaluation': 'VARCHAR(100)',
+    'comment': 'longtext',
+    'query_date': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
+    'begin_date': 'TIMESTAMP NOT NULL',
+    'end_date': 'TIMESTAMP NOT NULL',
+    'completion_tokens': 'INT',
+    'prompt_tokens': 'INT',
+    'total_tokens': 'INT',
+    'context_used': 'LONGTEXT',
+    'context_eval': 'varchar(100) DEFAULT NULL',
+    'context_ids': 'longtext',
+    'context_ids_total': 'longtext',
+    'alternate_prompts': 'longtext',
+    'embedding_model': 'VARCHAR(100)',
+    'chunk_size': 'INT',
+    'alpha_value': 'float',
+    'improved_query':'longtext',
+    'query_intent':'longtext',
+    'keyterms':'longtext'
+}
+
+SQL_EVAL_CHUNKS_TABLE = "eval_chunks"
+
+# SQL query to create the table
+SQL_EVAL_CHUNKS_TABLE_SCHEMA = {
+    "id_sample": "INT AUTO_INCREMENT PRIMARY KEY",  # Unique record ID
+    "id": "VARCHAR(10) NOT NULL",              # Reference to the chunk ID
+    "doc_type": "VARCHAR(255) NOT NULL",     # Type of the document
+    "source": "VARCHAR(255) NOT NULL",       # Source file or document
+    "content": "longtext",
+    "merged_content":"longtext",
+    "metadata":"longtext",
+    "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP"  # Record creation timestamp
+}
+
+SQL_EVAL_QAS_TABLE = "eval_QAs"
+SQL_EVAL_QAS_TABLE_SCHEMA = {
+    "id_question": "INT AUTO_INCREMENT PRIMARY KEY",  # Unique record ID for each QA pair
+    "id_sample": f"INT NULL, FOREIGN KEY (id_sample) REFERENCES {SQL_EVAL_CHUNKS_TABLE}(id_sample) ON DELETE SET NULL",                      # Foreign key referencing eval_chunks
+    "type_content": "VARCHAR(25)",
+    "type_question": "VARCHAR(25)",
+    "question": "longtext",                      # Generated question
+    "expected_answer": "longtext",                        # Expected answer (nullable)
+    "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",  # Record creation timestamp
+}

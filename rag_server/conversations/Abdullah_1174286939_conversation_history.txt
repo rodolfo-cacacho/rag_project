@@ -1,0 +1,29 @@
+[2024-09-06 20:04:16.629840] user: /start
+[2024-09-06 20:04:16.839645] assistant: Willkommen Abdullah bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:04:31.977042] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-09-06 20:04:35.977743] user: /getaccess
+[2024-09-06 20:05:40.729913] user: /start
+[2024-09-06 20:05:40.941049] assistant: Willkommen Abdullah bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:05:54.166282] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-09-06 20:05:55.538777] user: /getaccess
+[2024-09-06 20:05:55.767534] assistant: Willkommen Abdullah bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-09-06 20:06:04.909302] assistant: Falsches Passwort! Versuche es erneut! Sende /cancel, um die Anfrage zu beenden!
+[2024-09-06 20:09:36.731363] user: /start
+[2024-09-06 20:09:36.927788] assistant: Willkommen Abdullah bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:09:44.553521] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-09-06 20:09:46.865391] user: /getaccess
+[2024-09-06 20:09:47.054974] assistant: Willkommen Abdullah bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-09-06 20:13:47.525097] user: /start
+[2024-09-06 20:13:47.803816] assistant: Willkommen Abdullah bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:13:51.396289] user: /getaccess
+[2024-09-06 20:13:51.596054] assistant: Willkommen Abdullah bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-09-06 20:13:56.291287] assistant: Richtiges Passwort! Du kannst jetzt mit THWS Bau Bot chatten!
+[2024-09-06 20:14:30.925192] user: Was steht in Richtlinien BEG über Fenster?
+[2024-09-06 20:15:33.699172] user: Was steht in Richtlinien BEG über Fenster?
+[2024-09-06 20:18:38.594652] user: /start
+[2024-09-06 20:18:38.803883] assistant: Willkommen Abdullah bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:18:41.242706] user: Was steht in Richtlinien BEG über Fenster?
+[2024-09-06 20:22:53.315681] user: Welche U-Wert-Anforderungen haben denkmalgeschützte Fenster?
+[2024-09-06 20:23:02.002901] assistant: Die U-Wert-Anforderungen für Fenster bei Baudenkmalen und bei sonstiger besonders erhaltenswerter Bausubstanz nur für Wohngebäude betragen 1,4 W/(m²·K).
+
+Quelle: Richtlinie BEG EM (2023-12-21) Seite 17.

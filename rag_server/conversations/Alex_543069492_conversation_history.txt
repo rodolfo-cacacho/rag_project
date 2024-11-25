@@ -1,0 +1,10 @@
+[2024-07-17 16:53:08.354568] user: /start
+[2024-07-17 16:53:08.584621] assistant: Willkommen Alex bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-07-17 16:53:15.738569] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-07-17 16:53:19.986429] user: /getaccess
+[2024-07-17 16:53:20.144564] assistant: Willkommen Alex bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-07-17 16:53:45.459813] assistant: Falsches Passwort! Versuche es erneut! Sende /cancel, um die Anfrage zu beenden!
+[2024-07-17 16:53:57.927076] assistant: Richtiges Passwort! Du kannst jetzt mit THWS Bau Bot chatten!
+[2024-07-17 16:54:07.213703] user: /start
+[2024-07-17 16:54:07.369448] assistant: Willkommen Alex bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-07-17 16:54:29.414697] user: Hi random question

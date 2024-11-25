@@ -1,0 +1,3 @@
+[2024-05-13 14:37:06.405909] user: /start
+[2024-05-13 14:37:06.664848] assistant: Welcome Abdullah to ChatGPT! Type something to start chatting.
+[2024-05-13 14:37:19.928403] assistant: Sorry, you are not authorized to interact with this bot.

@@ -1,0 +1,89 @@
+[2024-05-13 14:37:24.897107] user: /start
+[2024-05-13 14:37:25.043408] assistant: Welcome Kilian to ChatGPT! Type something to start chatting.
+[2024-05-13 14:37:45.262109] assistant: Sorry, you are not authorized to interact with this bot.
+[2024-06-06 15:24:32.828929] user: /start
+[2024-06-06 15:24:32.998253] assistant: Welcome Kilian to THWS Bau Bot! Type something to start chatting.
+[2024-06-06 15:24:41.888553] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:24:51.368988] user: /getaccess
+[2024-06-06 15:24:51.520117] assistant: Welcome Kilian to THWS Bau Bot! You are not allowed to chat, please enter the password to gain access to the bot.
+[2024-06-06 15:25:24.281715] assistant: Incorrect password! Try again! Send /cancel to stop requesting access!
+[2024-06-06 15:26:21.220105] assistant: Correct password! You can now chat with THWS Bau Bot!
+[2024-06-06 15:26:49.090385] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:26:57.110641] user: /getaccess
+[2024-06-06 15:26:57.277865] assistant: Welcome Kilian to THWS Bau Bot! You are not allowed to chat, please enter the password to gain access to the bot.
+[2024-06-06 15:27:31.090863] assistant: Incorrect password! Try again! Send /cancel to stop requesting access!
+[2024-06-06 15:27:49.383445] assistant: Correct password! You can now chat with THWS Bau Bot!
+[2024-06-06 15:27:55.197371] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:29:00.092202] user: /getaccess
+[2024-06-06 15:29:00.296959] assistant: Welcome Kilian to THWS Bau Bot! You are already allowed to chat.
+[2024-06-06 15:29:09.561838] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:37:26.354955] user: /start
+[2024-06-06 15:37:26.512288] assistant: Welcome Kilian to THWS Bau Bot! Type something to start chatting.
+[2024-06-06 15:37:37.988276] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:37:42.942927] user: /getaccess
+[2024-06-06 15:37:43.102190] assistant: Welcome Kilian to THWS Bau Bot! You are not allowed to chat, please enter the password to gain access to the bot.
+[2024-06-06 15:37:52.273751] assistant: Correct password! You can now chat with THWS Bau Bot!
+[2024-06-06 15:37:59.241946] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:38:27.979255] user: /start
+[2024-06-06 15:38:28.240776] assistant: Welcome Kilian to THWS Bau Bot! Type something to start chatting.
+[2024-06-06 15:38:32.081306] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:38:35.677005] user: /getaccess
+[2024-06-06 15:38:35.898215] assistant: Welcome Kilian to THWS Bau Bot! You are already allowed to chat.
+[2024-06-06 15:38:38.796611] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:40:44.740114] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:40:47.663900] user: /getaccess
+[2024-06-06 15:40:47.811715] assistant: Welcome Kilian to THWS Bau Bot! You are already allowed to chat.
+[2024-06-06 15:40:53.900685] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:41:09.687768] user: /end
+[2024-06-06 15:41:09.866583] assistant: Thank you Kilian for using the THWS Bau Bot! It was a pleasure helping you.
+[2024-06-06 15:41:16.790690] user: /start
+[2024-06-06 15:41:16.945576] assistant: Welcome Kilian to THWS Bau Bot! Type something to start chatting.
+[2024-06-06 15:41:25.096308] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:42:18.761229] user: /start
+[2024-06-06 15:42:18.916262] assistant: Welcome Kilian to THWS Bau Bot! Type something to start chatting.
+[2024-06-06 15:42:31.451801] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:42:33.465490] user: /getaccess
+[2024-06-06 15:42:33.692058] assistant: Welcome Kilian to THWS Bau Bot! You are already allowed to chat.
+[2024-06-06 15:43:53.867153] user: /end
+[2024-06-06 15:43:54.087639] assistant: Thank you Kilian for using the THWS Bau Bot! It was a pleasure helping you.
+[2024-06-06 15:43:55.111966] user: /start
+[2024-06-06 15:43:55.319642] assistant: Welcome Kilian to THWS Bau Bot! Type something to start chatting.
+[2024-06-06 15:44:04.333065] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:44:44.125870] assistant: Sorry, you are not authorized to interact with this bot. Use command /getaccess to request permission.
+[2024-06-06 15:46:00.706392] user: Hi
+[2024-06-06 15:46:00.914344] assistant: Your message is too short for me to understand. Please provide more information.
+[2024-06-06 15:46:34.396925] user: Wie lauet der Antragsprozess für einen BAFA antrag?
+[2024-06-06 15:46:47.809195] assistant: Der Antragsprozess für eine Förderung durch das Bundesamt für Wirtschaft und Ausfuhrkontrolle (BAFA) kann je nach Förderprogramm variieren. Hier ist eine allgemeine Übersicht der Schritte, die typischerweise bei einem BAFA-Antrag durchlaufen werden:
+
+### 1. Vorab-Information:
+- **Förderprogramme prüfen:** Informiere dich auf der BAFA-Website oder bei anderen Informationsquellen über die verschiedenen Förderprogramme und finde heraus, welches am besten zu deinem Vorhaben passt.
+- **Voraussetzungen:** Stelle sicher, dass du alle Voraussetzungen für die Förderung erfüllst. Das kann z.B. den Eigentumsnachweis, Nutzungskosten oder technische Spezifikationen betreffen.
+
+### 2. Antragstellung:
+- **Registrieren:** Melde dich im elektronischen Antragsportal (BAFA Online) an und erstelle ein Benutzerkonto.
+- **Formular ausfüllen:** Fülle das elektronische Antragsformular mit den geforderten Angaben aus. Achte darauf, dass alle Informationen korrekt und vollständig sind.
+- **Unterlagen hochladen:** Lade alle notwendigen Dokumente (z.B. Kostenvoranschläge, Nachweise etc.) in das Portal hoch.
+
+### 3. Einreichung:
+- **Einreichen:** Reiche den vollständig ausgefüllten Antrag online ein.
+- **Bestätigung:** Du erhältst eine Bestätigung über den Eingang deines Antrags. Diese Bestätigung enthält in der Regel eine Vorgangsnummer, die du für die weitere Kommunikation benötigst.
+
+### 4. Prüfung:
+- **Bearbeitung durch BAFA:** Dein Antrag wird nun von der BAFA geprüft. Dies kann einige Zeit in Anspruch nehmen. Eventuell werden noch weitere Unterlagen oder Informationen angefordert.
+- **Rückfragen beantworten:** Sollten vom BAFA Rückfragen kommen oder weitere Unterlagen benötigt werden, stelle sicher, dass du diese zeitnah nachreichst.
+
+### 5. Bewilligung:
+- **Zuwendungsbescheid:** Wenn dein Antrag genehmigt wird, erhältst du einen Zuwendungsbescheid, der die Höhe der bewilligten Förderung und die weiteren Schritte erläutert.
+- **Umsetzung:** Du kannst nun mit der Umsetzung deines Projekts beginnen, sofern dies im Rahmen der Förderbedingungen erlaubt ist.
+
+### 6. Auszahlung:
+- **Projektabschluss:** Nachdem das Projekt abgeschlossen ist, musst du entsprechende Nachweise (z.B. Rechnungen, Abnahmeprotokolle) bei der BAFA einreichen.
+- **Auszahlungsantrag:** Stelle einen Antrag auf Auszahlung der Fördermittel. Auch hierzu musst du entsprechende Formulare im Portal ausfüllen.
+- **Prüfung:** Die BAFA prüft die eingereichten Nachweise und den Auszahlungsantrag.
+- **Fördermittel erhalten:** Nach erfolgreicher Prüfung erfolgt die Auszahlung der bewilligten Fördermittel auf dein Konto.
+
+Es ist wichtig, dass du dich genau an die Vorgaben der BAFA hältst und alle Fristen einhältst. Jedes Förderprogramm kann spezifische zusätzliche Anforderungen haben, daher empfiehlt es sich, die Richtlinien und Anleitungen des jeweiligen Programms gründlich zu lesen und gegebenenfalls direkt bei der BAFA nachzufragen.
+[2024-06-06 15:47:13.612979] user: /end
+[2024-06-06 15:47:13.766739] assistant: Thank you Kilian for using the THWS Bau Bot! It was a pleasure helping you.
+[2024-06-06 15:48:10.144491] user: /end
+[2024-06-06 15:48:10.297526] assistant: Thank you Kilian for using the THWS Bau Bot! It was a pleasure helping you.

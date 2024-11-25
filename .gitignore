@@ -1,0 +1,8 @@
+/data/documents/output/
+/data/documents/split/
+/data/documents/clean/
+/data/extra/
+/data/storage/embeddings/
+/sharing/
+**/__pycache__/
+/extra/

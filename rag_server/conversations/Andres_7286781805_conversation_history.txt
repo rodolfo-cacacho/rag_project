@@ -1,0 +1,24 @@
+[2024-08-21 00:08:50.778600] user: /start
+[2024-08-21 00:08:51.069071] assistant: Willkommen Andres bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-08-21 00:09:24.215575] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-08-21 00:09:48.949433] user: /getaccess
+[2024-08-21 00:09:49.180487] assistant: Willkommen Andres bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-08-21 00:11:01.193092] assistant: Richtiges Passwort! Du kannst jetzt mit THWS Bau Bot chatten!
+[2024-08-21 00:11:26.026942] user: Was ist der Zweck der Richtlinie BEG EM?
+[2024-08-21 00:11:29.540209] assistant: Ich weiß es nicht. Die bereitgestellten Informationen enthalten keine eindeutige Aussage über den Zweck der Richtlinie BEG EM. 
+
+Quelle: Richtlinie BEG EM (2023-12-21)
+[2024-08-21 00:18:05.393832] user: Welches Ziel verfolgt die Richtlinie BEG EM?
+[2024-08-21 00:18:08.363157] assistant: Ich weiß es nicht. Die bereitgestellten Informationen enthalten keine eindeutige Aussage über den Zweck der Richtlinie BEG EM.
+
+Quelle: Richtlinie BEG EM (2023-12-21)
+[2024-08-21 00:19:42.561604] user: Welche Maßnahmen werden durch die BEG EM gefördert?
+[2024-08-21 00:19:47.037165] assistant: Die Richtlinie BEG EM (Bundesförderung für effiziente Gebäude – Einzelmaßnahmen) fördert verschiedene energetische Sanierungsmaßnahmen an Wohngebäuden und Nichtwohngebäuden. Zu den geförderten Maßnahmen gehören unter anderem:
+
+- Wärmedämmung von Wänden, Dachflächen und anderen Flächen, die das beheizte oder gekühlte Gebäudevolumen begrenzen
+- Erneuerung von Fenstern und Außentüren
+- Erneuerung der Heizungsanlage oder Einbau von Heizungsunterstützungsanlagen, die erneuerbare Energien nutzen (z. B. Umweltwärme, Geothermie)
+- Einbau von Geräten zur digitalen Energieverbrauchsoptimierung
+- Errichtung von Wärmespeichern neben dem Gebäude
+
+Quelle: Richtlinie BEG EM (2023-12-21)

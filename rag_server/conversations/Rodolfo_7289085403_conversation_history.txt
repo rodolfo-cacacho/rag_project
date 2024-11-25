@@ -1,0 +1,234 @@
+[2024-07-17 17:16:46.976517] user: /start
+[2024-07-17 17:16:47.182961] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-07-17 17:16:56.112030] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-07-17 17:17:02.126671] user: /getaccess
+[2024-07-17 17:17:02.275453] assistant: Willkommen Rodolfo bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-07-17 17:17:34.674287] assistant: Falsches Passwort! Versuche es erneut! Sende /cancel, um die Anfrage zu beenden!
+[2024-07-17 17:18:49.065345] user: /start
+[2024-07-17 17:18:49.272222] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-07-17 17:18:52.924215] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-07-17 17:18:54.765398] user: /getaccess
+[2024-07-17 17:18:54.949536] assistant: Willkommen Rodolfo bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-07-17 17:19:44.940354] assistant: Richtiges Passwort! Du kannst jetzt mit THWS Bau Bot chatten!
+[2024-07-17 17:20:59.592717] user: /start
+[2024-07-17 17:20:59.855223] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-07-17 17:21:21.963123] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-07-17 17:21:24.678938] user: /getaccess
+[2024-07-17 17:21:24.880426] assistant: Willkommen Rodolfo bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-07-17 17:23:35.190770] user: /start
+[2024-07-17 17:23:35.401402] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-07-17 17:23:41.337361] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-07-17 17:23:42.601119] user: /getaccess
+[2024-07-17 17:23:42.795684] assistant: Willkommen Rodolfo bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-07-17 17:24:05.505071] assistant: Richtiges Passwort! Du kannst jetzt mit THWS Bau Bot chatten!
+[2024-07-17 17:29:50.661930] user: /start
+[2024-07-17 17:29:50.978379] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-07-17 17:29:55.229586] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-07-17 17:29:56.722251] user: /getaccess
+[2024-07-17 17:29:56.871388] assistant: Willkommen Rodolfo bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-07-17 17:30:15.341379] assistant: Richtiges Passwort! Du kannst jetzt mit THWS Bau Bot chatten!
+[2024-07-17 17:31:26.362526] user: /start
+[2024-07-17 17:31:26.566197] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-07-17 17:31:37.561577] assistant: Tut mir leid, du bist nicht berechtigt, mit diesem Bot zu interagieren. Verwende den Befehl /getaccess, um eine Erlaubnis anzufordern.
+[2024-07-17 17:31:39.288376] user: /getaccess
+[2024-07-17 17:31:39.596996] assistant: Willkommen Rodolfo bei THWS Bau Bot! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.
+[2024-07-17 17:31:46.994947] assistant: Richtiges Passwort! Du kannst jetzt mit THWS Bau Bot chatten!
+[2024-08-27 20:03:45.420789] user: /start
+[2024-08-27 20:03:45.656051] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-08-27 20:03:55.156626] user: Wann gibt es den Einkommensbonus?
+[2024-08-27 20:05:50.537962] user: Wann gibt es den Einkommensbonus?
+[2024-08-27 20:08:00.949310] user: Wann gibt es den Einkommensbonus?
+[2024-08-27 20:10:37.577170] user: Wann gibt es den Einkommensbonus?
+[2024-08-27 20:10:40.081836] assistant: Es wurde kein Kontext zu den gestellten Fragen gefunden. Bitte überprüfe die Frage oder formuliere sie gegebenenfalls um.
+[2024-08-28 16:16:17.491499] user: /start
+[2024-08-28 16:16:17.718207] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-08-28 16:16:26.848954] user: Waren Gasbrennwertheizungen 2021 förderfähig?
+[2024-08-28 16:32:16.450848] user: /start
+[2024-08-28 16:32:16.695051] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-08-28 16:32:19.788355] user: Waren Gasbrennwertheizungen 2021 förderfähig?
+[2024-08-28 16:32:26.006710] assistant: Ich weiß es nicht.
+
+Quelle: BEG Infoblatt förderfähigen Kosten und BMWK - FAQ BEG (2021).
+[2024-09-01 18:07:29.905074] user: /start
+[2024-09-01 18:07:30.138911] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-01 18:07:42.531281] user: Welche Maßnahmen zur Fachplanung und Baubegleitung sind förderfähig?
+[2024-09-01 18:07:50.807673] assistant: Die förderfähigen Maßnahmen zur Fachplanung und Baubegleitung beinhalten:
+
+- Akustische Fachplanung zur Verbesserung des Lärmschutzes bei relevanten technischen Anlagen entsprechend den Anforderungen des Leitfadens der Bund/Länder-Arbeitsgemeinschaft Immissionsschutz.
+- Kosten für Gutachten und Messungen zur Umsetzung von Schallschutzmaßnahmen.
+- Beratungs- und Planungsleistungen zur Nachhaltigkeitszertifizierung durch unabhängige Nachhaltigkeits-Beraterinnen oder -Berater, um die Anforderungen des „Qualitätssiegels Nachhaltiges Gebäude“ zu erfüllen.
+- Bestandsaufnahme des Gebäudes und der Anlagen (z. B. Lüftungskanälen hinsichtlich Rohrführung, Schallentkopplung, Luftdichtheit und Verschmutzung).
+- Entwicklung energetischer Konzepte und Erstellen von Beratungsinstrumenten.
+- Fachplanung zur technischen Gebäudeausrüstung.
+- Erstellung eines Beleuchtungskonzeptes mit energiesparenden Leuchtmitteln.
+
+Quelle: BEG Infoblatt förderfähigen Kosten_9 (01.01.2024) Seiten 27-28
+[2024-09-01 18:08:59.130557] user: /start
+[2024-09-01 18:08:59.335741] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-01 18:09:08.279958] user: Welche Maßnahmen zur Fachplanung und Baubegleitung sind förderfähig?
+[2024-09-01 18:09:13.589021] assistant: Zu den förderfähigen Maßnahmen zur Fachplanung und Baubegleitung gehören laut der Richtlinie BEG EM (2023-12-21), die Dokumentation der vom Energieeffizienz-Experten erbrachten Leistungen sowie die akustische Fachplanung, die den Anforderungen des Leitfadens für die Verbesserung des Schutzes gegen Lärm entspricht. Einen spezifischeren Überblick der förderfähigen Leistungen findest du im BEG Infoblatt förderfähigen Kosten:
+
+- **Bestandsaufnahme** (z. B. vorhandene Lüftungskanäle)
+- **Detaillierte Kontrolle des Bestands**
+- **Messtechnische Untersuchungen**
+- **Entwicklung geeigneter energetischer Konzepte**
+- **Erstellen von Beratungsinstrumenten**
+- **Entwicklung eines energetischen Gesamtkonzeptes**
+- **Erstellung eines Beleuchtungskonzeptes mit energiesparenden Leuchtmitteln**
+- **Fachplanung zur technischen Gebäudeausrüstung**
+- **Beratung und Abstimmung des energetischen Gesamtkonzeptes**
+- **Abstimmung der Systemauswahl**
+- **Konzept zur Wärmebrückenminimierung**
+
+Quelle: BEG Infoblatt förderfähigen Kosten (01.01.2024).
+[2024-09-01 18:23:51.651361] user: /start
+[2024-09-01 18:23:51.862511] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-01 18:23:58.611773] user: /end
+[2024-09-01 18:23:58.770229] assistant: Vielen Dank Rodolfo, dass du den THWS Bau Bot benutzt hast! Es war mir eine Freude, dir zu helfen.
+[2024-09-01 18:24:02.509234] user: /reset
+[2024-09-01 18:24:02.709663] assistant: Deine Gesprächshistorie wird zurückgesetzt!
+[2024-09-01 18:24:05.814419] user: /getaccess
+[2024-09-01 18:24:05.983131] assistant: Willkommen Rodolfo bei THWS Bau Bot! Du darfst bereits chatten.
+[2024-09-01 18:24:14.906165] user: /cancel
+[2024-09-01 18:24:15.064674] assistant: Vorgang abgebrochen!
+[2024-09-01 18:25:20.729057] user: /start
+[2024-09-01 18:25:20.929341] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-01 18:25:23.873830] user: /cancel
+[2024-09-01 18:25:24.018989] assistant: Vorgang abgebrochen!
+[2024-09-02 01:10:39.526155] user: /start
+[2024-09-02 01:10:39.806151] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 01:10:43.242540] user: /cancel
+[2024-09-02 01:10:43.397290] assistant: Vorgang abgebrochen!
+[2024-09-02 01:10:49.789732] user: /end
+[2024-09-02 01:10:49.937813] assistant: Vielen Dank Rodolfo, dass du den THWS Bau Bot benutzt hast! Es war mir eine Freude, dir zu helfen.
+[2024-09-02 01:10:51.572256] user: /cancel
+[2024-09-02 01:10:51.733761] assistant: Vorgang abgebrochen!
+[2024-09-02 01:11:10.847164] user: Welchen Arten von Wärmepumpen werden in den Richtlinien genannt?
+[2024-09-02 01:11:15.045044] assistant: In den Richtlinien werden folgende Arten von Wärmepumpen genannt:
+
+1. Elektrisch betriebene Wärmepumpen zur Raumbeheizung mit einer Wärmequelle, die Luft ist, und einer Leistung von ≤ 12 kW, die eine Effizienzklasse von A++ oder A+++ haben müssen.
+2. Elektrisch betriebene Wärmepumpen mit einer Leistung von > 12 kW für alle Wärmequellen, die eine Effizienz von mindestens 150% (ηs,h ≥ 150%) erreichen müssen.
+
+Quelle: BEG EM Liste förderfähigen WP (2024-04-01)
+[2024-09-02 01:11:27.418480] user: (Januar 2019) Welchen Arten von Wärmepumpen werden in den Richtlinien genannt?
+[2024-09-02 01:15:48.410328] user: /start
+[2024-09-02 01:15:48.662795] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 01:15:57.042465] user: (Januar 2019) Welchen Arten von Wärmepumpen werden in den Richtlinien genannt?
+[2024-09-02 01:22:14.563358] user: /start
+[2024-09-02 01:22:14.781865] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 01:22:20.342912] user: (Januar 2019) Welchen Arten von Wärmepumpen werden in den Richtlinien genannt?
+[2024-09-02 01:23:27.278000] user: /start
+[2024-09-02 01:23:27.520046] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 01:23:39.895870] user: (Januar 2019) Welchen Arten von Wärmepumpen werden in den Richtlinien genannt?
+[2024-09-02 01:25:16.639604] user: /start
+[2024-09-02 01:25:16.832181] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 01:25:20.499059] user: (Januar 2019) Welchen Arten von Wärmepumpen werden in den Richtlinien genannt?
+[2024-09-02 01:29:04.038364] user: /start
+[2024-09-02 01:29:04.250975] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 01:29:08.617957] user: (Januar 2019) Welchen Arten von Wärmepumpen werden in den Richtlinien genannt?
+[2024-09-02 15:16:39.853226] user: /start
+[2024-09-02 15:16:40.069370] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 15:16:45.783376] user: /end
+[2024-09-02 15:16:45.988102] assistant: Vielen Dank Rodolfo, dass du den THWS Bau Bot benutzt hast! Es war mir eine Freude, dir zu helfen.
+[2024-09-02 15:46:29.165509] user: /start
+[2024-09-02 15:46:29.432182] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 15:46:36.323796] user: Welche Maßnahmen zur Fachplanung und Baubegleitung sind förderfähig?
+[2024-09-02 15:46:47.101565] assistant: Die förderfähigen Maßnahmen zur Fachplanung und Baubegleitung umfassen eine Vielzahl von Leistungen, sowohl optionale als auch verpflichtende. Hier sind einige Beispiele:
+
+1. **Konzeptionierung und Bestandsaufnahme**:
+   - Bestandsaufnahme von Gebäude und Anlagen auf Basis von Plänen, Dokumentationen oder Datenaufnahme vor Ort.
+   - Detaillierte Aufnahme und Kontrolle des Bestands (z. B. Lüftungskanäle hinsichtlich Rohrführung, Schallentkopplung, Luftdichtheit und Verschmutzung).
+   - Messtechnische Untersuchungen zur Unterstützung der Erstellung eines energetischen Gebäudekonzeptes.
+   - Entwicklung geeigneter energetischer Konzepte und Beratungsinstrumenten.
+   - Entwicklung eines energetischen Gesamtkonzeptes (Wärmeschutz- und Anlagenkonzept).
+   - Untersuchung von Varianten hinsichtlich der Effizienz und Wirtschaftlichkeit.
+   - Erstellung eines Beleuchtungskonzeptes mit energiesparenden Leuchtmitteln.
+   - Fachplanung zur technischen Gebäudeausrüstung.
+   - Beratung und Abstimmung des energetischen Gesamtkonzeptes mit den Auftraggebenden.
+   - Abstimmung der Systemauswahl mit den Auftraggebenden und ggf. weiteren Planungsbeteiligten (Objektplanende, Haustechnik- und Tragwerksplanende).
+   - Konzept zur Wärmebrückenminimierung.
+
+Quelle: BEG Infoblatt förderfähigen Kosten_9 (01.01.2024) Pages: 27-28
+[2024-09-02 15:50:28.207596] user: /start
+[2024-09-02 15:50:28.411365] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-02 15:50:40.520775] user: Welche Maßnahmen zur Fachplanung und Baubegleitung sind förderfähig?
+[2024-09-02 15:51:01.892040] assistant: Förderfähig sind Maßnahmen zur Fachplanung und Baubegleitung im Rahmen der energetischen Sanierung oder des Neubaus. Diese beinhalten:
+
+1. **Konzeptionierung und Bestandsaufnahme:** 
+    - Bestandsaufnahme von Gebäuden und Anlagen basierend auf Plänen oder Vor-Ort-Datenaufnahmen
+    - Detaillierte Kontrolle vorhandener Lüftungskanäle (Rohrführung, Schallentkopplung, Luftdichtheit, Verschmutzung)
+    - Messtechnische Untersuchungen zur Unterstützung der Erstellung eines energetischen Gebäudekonzeptes
+    - Entwicklung geeigneter energetischer Konzepte und Beratungsinstrumente
+    - Energetisches Gesamtkonzept (Wärmeschutz- und Anlagenkonzept), Untersuchung von Effizienz- und Wirtschaftlichkeitsvarianten
+    - Erstellung eines Beleuchtungskonzeptes mit energiesparenden Leuchtmitteln
+    - Fachplanung zur technischen Gebäudeausrüstung
+    - Beratung und Abstimmung des energetischen Gesamtkonzeptes mit den Auftraggebenden
+    - Abstimmung der Systemauswahl mit den Auftraggebenden und weiteren Planungsbeteiligten
+    - Konzept zur Wärmebrückenminimierung
+
+2. **Akustische Fachplanung:** 
+    - Planungsleistungen, die den Anforderungen des Leitfadens für den Schutz gegen Lärm bei technischen Anlagen entsprechen
+    - Gutachten und Messungen zu Schallschutzmaßnahmen
+
+3. **Nachhaltigkeitszertifizierung:** 
+    - Beratungs- und Planungsleistungen zur Erlangung der Nachhaltigkeitszertifizierung „Qualitätssiegel Nachhaltiges Gebäude“
+
+Quelle: "Richtlinie BEG EM (2023-12-21)", "BEG Infoblatt förderfähigen Kosten_9 (01.01.2024)"
+[2024-09-02 15:51:21.848035] user: Welche Maßnahmen zur Fachplanung und Baubegleitung sind förderfähig? (April 2018)
+[2024-09-04 23:49:49.297455] user: /start
+[2024-09-04 23:49:49.521760] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-04 23:49:53.116987] user: Welche Maßnahmen zur Fachplanung und Baubegleitung sind förderfähig?
+[2024-09-04 23:50:02.314984] assistant: Es wurde kein Kontext zu den gestellten Fragen gefunden. Bitte überprüfe die Frage oder formuliere sie gegebenenfalls um.
+[2024-09-05 00:45:21.034882] user: /start
+[2024-09-05 00:45:21.244004] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-05 00:45:28.579216] user: Welche Maßnahmen zur Fachplanung und Baubegleitung sind förderfähig?
+[2024-09-05 00:45:37.452781] assistant: Gemäß dem Kontext aus der „Richtlinie BEG EM“ und dem „BEG Infoblatt förderfähigen Kosten“ sind die folgenden Maßnahmen zur Fachplanung und Baubegleitung förderfähig:
+
+1. **Energetische Fachplanung und Baubegleitung**:
+   - Bestandsaufnahme (Gebäude und Anlagen) auf Basis von Plänen, sonstigen Dokumentationen oder Datenaufnahme vor Ort.
+   - Detaillierte Aufnahme und Kontrolle des Bestands (z. B. von vorhandenen Lüftungskanälen).
+   - Messtechnische Untersuchungen zur Unterstützung für die Erstellung eines energetischen Gebäudekonzeptes.
+   - Entwicklung geeigneter energetischer Konzepte und eines energetischen Gesamtkonzeptes.
+   - Erstellung von Beratungsinstrumenten und Beleuchtungskonzepten.
+   - Fachplanung zur technischen Gebäudeausrüstung.
+   - Beratung und Abstimmung des energetischen Gesamtkonzeptes mit den Auftraggebenden.
+   - Konzept zur Wärmebrückenminimierung.
+ 
+2. **Akustische Fachplanung**:
+   - Leistungen, die den Anforderungen des Leitfadens für die Verbesserung des Schutzes gegen Lärm entsprechen, wie Schallschutzmaßnahmen für technische Anlagen (z. B. Luftwärmepumpen, Klimageräte).
+
+3. **Nachhaltigkeitszertifizierung**:
+   - Beratungs- und Planungsleistungen für Effizienzhaus bzw. Effizienzgebäude mit NH-Klasse.
+   - Unterstützung bei der Zuerkennung einer Nachhaltigkeitszertifizierung und Zusammenstellung der erforderlichen Unterlagen.
+
+Quelle: Richtlinie BEG EM (2023-12-21), Seiten 15-16 und BEG Infoblatt förderfähigen Kosten_9 (01.01.2024), Seiten 27-28.
+[2024-09-06 20:02:53.683674] user: /start
+[2024-09-06 20:02:54.214720] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:03:11.008306] user: Bezieht sich die Antwort auf denkmalgeschützte Fenster oder auf Fenster in denkmalgeschützten Gebäuden?
+[2024-09-06 20:03:23.943172] assistant: Die Antwort bezieht sich auf Fenster in denkmalgeschützten Gebäuden.
+
+Quelle: Richtlinie BEG EM (2023-12-21)
+
+Die Informationen in der Tabelle und den Textabschnitten erwähnen Fensterarbeiten im Zusammenhang mit Baudenkmalen und erhaltenswerter Bausubstanz, nicht speziell denkmalgeschützte Fenster.
+[2024-09-06 20:20:46.265257] user: /start
+[2024-09-06 20:20:46.495845] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:20:53.278826] user: Welche U-Wert-Anforderungen haben denkmalgeschützte Fenster?
+[2024-09-06 20:21:06.147222] assistant: Für denkmalgeschützte Fenster gelten folgende U-Wert-Anforderungen:
+
+- Bei Baudenkmälern für alle Gebäude und bei sonstiger besonders erhaltenswerter Bausubstanz nur für Wohngebäude: U-Wert von 1,4 W/(m²·K)
+- Bei Gebäuden mit echten glasteilenden Sprossen bei Baudenkmälern für alle Gebäude und bei sonstiger besonders erhaltenswerter Bausubstanz nur für Wohngebäude: U-Wert von 1,6 W/(m²·K)
+
+Quelle: Richtlinie BEG EM (2023-12-21), Seite 17
+[2024-09-06 20:23:27.489567] user: Was steht in Richtlinien BEG über Fenster?
+[2024-09-06 20:25:57.854159] user: /start
+[2024-09-06 20:25:58.082908] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:26:00.478390] user: Was steht in Richtlinien BEG über Fenster?
+[2024-09-06 20:27:12.364498] user: /start
+[2024-09-06 20:27:12.878113] assistant: Willkommen Rodolfo bei THWS Bau Bot! Schreib etwas, um mit dem Chatten zu beginnen.
+[2024-09-06 20:27:24.951876] user: Was steht in Richtlinien BEG über Fenster?
+[2024-09-06 20:28:40.932126] user: Was steht in Richtlinien BEG über Fenster?
+[2024-09-06 20:28:49.692039] assistant: In den Richtlinien der Bundesförderung für effiziente Gebäude (BEG) sind verschiedene Anforderungen und Vorgaben für Fenster beschrieben. Ein wichtiger Punkt betrifft den sommerlichen Wärmeschutz. Wenn Sonnenschutzeinrichtungen im Zusammenhang mit der Erneuerung oder Ertüchtigung von Fenstern installiert werden, ist kein Nachweis des sommerlichen Wärmeschutzes nach DIN 4108-2: 2013-02 erforderlich (*Quelle: Technische FAQ BEG EM_5 (2023-03-13), Seiten 2.08-2.09*). 
+
+Weitere Vorgaben beinhalten UW-Werte für Fenster. Der UW-Wert für Fenster, zum Beispiel Dachflächenfenster, kann nach DIN EN ISO 10077-1 mit dem nach EN 673 berechneten Ug-Wert der Verglasung für den geneigten Fall ermittelt werden. (*Quelle: Technische FAQ BEG EM_5 (2023-03-13), Seiten 4.02-4.07*).
+
+Ich hoffe, das hilft dir weiter!
