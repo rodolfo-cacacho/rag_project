@@ -8,7 +8,7 @@ import spacy
 import nltk
 from nltk.corpus import stopwords
 from utils.document_cleaning import post_clean_document
-from utils.chunking_embedding import extract_tokens_lemm_stop,clean_extracted_values_to_tokens
+from utils.tokens_lemmatization import extract_tokens_lemm_stop,clean_extracted_values_to_tokens
 import Levenshtein
 
 

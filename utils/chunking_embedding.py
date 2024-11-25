@@ -1,12 +1,10 @@
 from utils.document_cleaning import pre_clean_text,post_clean_document
+from utils.tokens_lemmatization import extract_tokens_lemm_stop,clean_extracted_values_to_tokens
 from semantic_text_splitter import TextSplitter
 from tokenizers import Tokenizer
 import json
 import re
 from collections import defaultdict,Counter
-import spacy
-import nltk
-from nltk.corpus import stopwords
 import openai
 import pandas as pd
 from collections import Counter
@@ -14,17 +12,8 @@ import Levenshtein
 import tqdm
 
 
-# Load German spaCy model
-nlp = spacy.load('de_core_news_lg')
-
 API_KEY_CGPT = "sk-proj-FrNMaLZT7tgBftIDPuBOT3BlbkFJFND9eOXtUMeCyWxplFlV"
 openai.api_key = API_KEY_CGPT
-
-
-# Load German stopwords and the German spaCy model
-nltk.download('stopwords')
-german_stopwords = set(stopwords.words('german'))
-domain_stopwords = ['sowie','überblick','beziehungsweise','verschieden','beispiel','gemäß']
 
 # Config and initialization
 config = {
@@ -643,72 +632,6 @@ def map_tokens_to_vocabulary(tokens, vocabulary):
     }
     # Map tokens to their vocabulary word
     return [synonym_map.get(token, token) for token in tokens]
-
-def clean_extracted_values_to_tokens(extract_values):
-    """
-    Function to transform and clean extracted values and words and convert them into tokens
-
-    params:
-    - extract_values (dict): Dictionary with different type of extracted values 
-    
-    """
-    tokens_total = []
-    for key,vals in extract_values.items():
-        if vals:
-            if key == 'parentheses_terms':
-                for term in vals:
-                    clean_text,extracted_terms = post_clean_document(term)
-                    clean_text_tokens = extract_tokens_lemm_stop(clean_text)
-                    tokens_total.extend(clean_text_tokens)
-                    for key_1,val_1 in extracted_terms.items():
-                        if val_1:
-                            if key_1 == 'parentheses_terms':
-                                for term in val_1:
-                                    clean_text_1,extracted_terms_1 = post_clean_document(term)
-                                    clean_text_1_tokens = extract_tokens_lemm_stop(clean_text_1)
-                                    tokens_total.extend(clean_text_1_tokens)
-                                    for key_2,val_2 in extracted_terms_1.items():
-                                        if val_2:
-                                            tokens_total.extend(val_2)
-                                            print(f'Wow {key_2}')
-                            else:
-                                tokens_total.extend(val_1)
-            else:
-                tokens_total.extend(vals)
-
-    return tokens_total
-
-def extract_tokens_lemm_stop(text,german_stopwords=german_stopwords,domain_stopwords=domain_stopwords,nlp_model = None):
-    
-    if nlp_model:
-        nlp = spacy.load(nlp_model)
-    else:
-        nlp = spacy.load('de_core_news_lg')
-
-    # Create spaCy doc
-    text = re.sub('\n',' ',text)
-    doc = nlp(text)
-    char_set = re.escape('.,-')
-    # Lemmatization and stop word removal
-    tokens = [
-        token.lemma_.lower() for token in doc 
-        if token.lemma_.lower() not in german_stopwords
-        and token.lemma_.lower() not in domain_stopwords
-        and not token.is_punct 
-        and len(token.lemma_) > 1
-        and not token.lemma_.isdigit()
-    ]
-
-    # Additional filtering: Remove tokens with only special characters or short numeric-like patterns
-    tokens = [
-        re.sub(rf'^[{char_set}]|[{char_set}]$', '', token) for token in tokens
-        if not re.fullmatch(r'\d{1}|\d+[,\.]?\d*', token)  # Exclude short or formatted numbers
-        and not re.fullmatch(r'[^\w]+', token)  # Exclude tokens with only special characters
-        and len(re.sub(rf'^[{char_set}]|[{char_set}]$', '', token)) > 1
-    ]
-
-    return tokens
-
 
 class WordFrequencyAnalyzer:
     def __init__(self):
