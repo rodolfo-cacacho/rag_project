@@ -10,6 +10,24 @@ class MySQLDB:
     def create_database(self):
         self.cursor.execute(f"CREATE DATABASE IF NOT EXISTS {self.database_name}")
 
+    def check_table_exists(self, table_name):
+        """
+        Checks if a table exists in the current database.
+
+        :param table_name: Name of the table to check.
+        :return: True if the table exists, False otherwise.
+        """
+        self.cursor.execute(f"USE {self.database_name}")
+        query = """
+            SELECT COUNT(*)
+            FROM information_schema.tables
+            WHERE table_schema = %s
+            AND table_name = %s
+        """
+        self.cursor.execute(query, (self.database_name, table_name))
+        result = self.cursor.fetchone()
+        return result[0] > 0
+
     def create_table(self, table_name, schema):
         """
         Creates a table with the given schema, adds missing columns, and warns about extraneous columns.

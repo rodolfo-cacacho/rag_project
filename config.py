@@ -43,6 +43,8 @@ GEN_PROMPTS = 3
 
 METADATA_DIR = 'data/documents/metadata'
 
+TABLE_STORE_DIR = 'data/storage/tables'
+
 METADATA_FILE_PATH = f'{METADATA_DIR}/Files_date_version.csv'
 
 # Bot CONFIG
@@ -61,7 +63,21 @@ DB_NAME = 'data_rag'
 # SQL TABLES
 
 SQL_CHUNK_TABLE = f'chunks_table_{SUFFIX}_{MAX_TOKENS}'
+
+SQL_CHUNK_TABLE_SCHEMA = {
+    'id': 'varchar(10) NOT NULL PRIMARY KEY',
+    'content': 'longtext NOT NULL',
+    'metadata': 'longtext NOT NULL'
+}
+
 SQL_VOCAB_BM25_TABLE = f'vocabulary_bm25_{SUFFIX}_{MAX_TOKENS}'
+
+SQL_VOCAB_BM25_TABLE_SCHEMA = {
+    "id": "INT NOT NULL PRIMARY KEY",
+    "word": "VARCHAR(255) NOT NULL",
+    "idf": "FLOAT",
+    "synonyms": "LONGTEXT"
+}
 
 SQL_USER_TABLE = 'user_db'
 
