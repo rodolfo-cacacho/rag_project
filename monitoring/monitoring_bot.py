@@ -5,6 +5,13 @@ print("Running Monitoring!")
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
 print("Computed project root:", project_root)
 
+import time
+
+print("Waiting for 60 seconds before starting...")
+time.sleep(60)  # Wait for 60 seconds
+print("Starting script...")
+# Continue with the rest of your script
+
 # Ensure the correct project root is added to `sys.path`
 if project_root not in sys.path:
     sys.path.append(project_root)
@@ -22,7 +29,6 @@ from telebot.util import smart_split
 from utils.MySQLDB_manager import MySQLDB
 from config import (CONFIG_SQL_DB,DB_NAME)
 
-
 sql_db_connector = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
 load_dotenv()
@@ -37,7 +43,6 @@ chat_id = os.getenv('ADMIN_TG_ID')
 # Path to the PID file and log file
 PIDFILE = "/home/ubuntu/docs/logs/rag_process.pid"
 LOGFILE = "/home/ubuntu/docs/logs/logfile.log"
-USER_CSV = "/home/ubuntu/docs/rag_clean_v1/bot/conversations/users_db.csv"
 
 def send_message(text):
     chunks = smart_split(text)
