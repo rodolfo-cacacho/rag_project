@@ -1,26 +1,27 @@
-import fnmatch
+import os
+import sys
+
+# Correct computation of project root to align with the actual directory
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../"))
+print("Computed project root:", project_root)
+
+# Ensure the correct project root is added to `sys.path`
+if project_root not in sys.path:
+    sys.path.append(project_root)
+
 import telebot
 from telebot import types
 import prettytable as pt
-import os
 import time
 import csv
-import sys
 from datetime import datetime
 import re
 import subprocess
 from dotenv import load_dotenv
 from telebot.util import smart_split
-from database_manager import MySQLDB
+from utils.MySQLDB_manager import MySQLDB
+from config import (CONFIG_SQL_DB,DB_NAME)
 
-# MySQL connection details
-CONFIG_SQL_DB = {
-    'user': 'root',
-    'password': 'admin123',
-    'host': 'localhost'
-}
-
-DB_NAME = 'data_rag'
 
 sql_db_connector = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
@@ -78,7 +79,7 @@ def send_uptime(message):
 
         # Filter the processes to find the relevant one
         for process in processes:
-            if 'python3' in process and 'main_rag.py' in process:
+            if 'python3' in process and 'main_rag_bm25.py' in process:
                 parts = process.split()
                 pid = parts[1]  # PID is usually the second element
                 start_time = parts[8]  # Adjust index if necessary

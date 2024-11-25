@@ -1,4 +1,4 @@
-import time
+
 import telebot
 from datetime import datetime
 from threading import Timer
@@ -18,17 +18,8 @@ bot = telebot.TeleBot(API_KEY_TG_NOTIFY)
 admin_chat_id = os.getenv('ADMIN_TG_ID')
 
 # Import the database connection class
-from database_manager import MySQLDB
-
-
-# MySQL connection details
-CONFIG_SQL_DB = {
-    'user': 'root',
-    'password': 'admin123',
-    'host': 'localhost'
-}
-
-DB_NAME = 'data_rag'
+from utils.MySQLDB_manager import MySQLDB
+from config import (CONFIG_SQL_DB,DB_NAME)
 
 sql_db_connector = MySQLDB(CONFIG_SQL_DB, DB_NAME)
 
