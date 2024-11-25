@@ -7,8 +7,8 @@ print("Computed project root:", project_root)
 
 import time
 
-print("Waiting for 60 seconds before starting...")
-time.sleep(60)  # Wait for 60 seconds
+print("Waiting for 20 seconds before starting...")
+time.sleep(20)  # Wait for 20 seconds
 print("Starting script...")
 # Continue with the rest of your script
 
