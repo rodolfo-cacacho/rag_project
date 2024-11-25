@@ -9,6 +9,7 @@ from pydantic import BaseModel
 import math
 import base64
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 # Set the seed
 seed_value = 15
@@ -133,122 +134,154 @@ def generate_questions(sql_con, table_eval_chunks, table_QAs, table_QAs_schema,o
 
     # Get all evaluation chunks from the database
     chunks = sql_con.get_all_records_as_dict(table_eval_chunks)
-    chunks = chunks[0:3]
 
     # Prepare the table for storing questions
     sql_con.create_table(table_QAs, table_QAs_schema)
 
-    for chunk in chunks:
-        # Extract content and metadata
-        content = chunk.get("merged_content", chunk["content"])
-        chunk_id = chunk["id_sample"]
-        doc_type = chunk["doc_type"]
-        text_type = chunk.get("type", "Text")  # Defaults to "text" if type is not provided
-        metadata = json.loads(chunk['metadata'])
-        paths = metadata['path']
-        if paths in ("", []):
-            img_paths = None
-        else:
-            img_paths = paths
-        
+    questions_gen = sql_con.get_all_records_as_dict(table_QAs)
 
-        instructions = "You are an AI assistant with expertise in technical and regulatory topics related to building efficiency and funding in Germany. Your task is to analyze the provided context and generate up to 5 questions in German. Ensure the questions are diverse, relevant, and directly answerable from the context. Focus on technical requirements, funding criteria, and procedural details, etc. Avoid repetition and ensure clarity in questions."
-       
-        prompt = f"""Your task is to generate questions from the given context. Follow these instructions:
+    #  Find unique id_sample values in the questions
+    used_id_samples = {q["id_sample"] for q in questions_gen}
+
+    # Filter out chunks that have already been used
+    chunks = [chunk for chunk in chunks if chunk["id_sample"] not in used_id_samples]
+
+
+    # Initialize the progress bar
+    with tqdm(total=len(chunks), desc="Generating Questions", unit="chunk") as pbar:
+        for chunk in chunks:
+            # Extract content and metadata
+            content = chunk.get("merged_content", chunk["content"])
+            chunk_id = chunk["id_sample"]
+            doc_type = chunk["doc_type"]
+            text_type = chunk.get("type", "Text")  # Defaults to "Text" if type is not provided
+            metadata = json.loads(chunk['metadata'])
+            paths = metadata['path']
+
+            if paths in ("", []):
+                img_paths = None
+            else:
+                img_paths = paths
+
+            # Instructions for question generation
+            instructions = (
+                "You are an AI assistant with expertise in technical and regulatory topics related to building "
+                "efficiency and funding in Germany. Your task is to analyze the provided context and generate up to "
+                "5 questions in German. Ensure the questions are diverse, relevant, and directly answerable from the "
+                "context. Focus on technical requirements, funding criteria, and procedural details, etc. Avoid "
+                "repetition and ensure clarity in questions."
+            )
+
+            # Prompt for GPT
+            prompt = f"""Your task is to generate questions from the given context. Follow these instructions:
 1. Generate up to 5 questions in **German**. Every question should be different and not only use different wording. The number of questions should depend on the richness of the content.
 2. Each question must be fully answerable from the given context.
 3. The answers should not contain any links.
 4. The questions should be of moderate difficulty.
 5. The question must be reasonable and must be understood and responded to by humans.
-6. Do not use phrases that 'provided context',etc in the question
-7. Question can be of type:
+6. Do not use phrases like 'provided context', etc., in the question.
+7. Questions can be of types:
    - Factual: Thresholds, limits, or details.
    - Procedural: Steps or processes.
    - Analytical: Implications or reasoning.
-8. The question must be in **German**.
+8. The questions must be in **German**.
 
 Document: {doc_type}
 
 Context: {content}
 """
-        answer = call_gpt_api_with_multiple_images(instructions=instructions,
-                                                 prompt=prompt,
-                                                 response_format=genQuestions,
-                                                 img_paths=img_paths)
-        answer = json.loads(answer)
-        questions = answer['questions']
+            # Call GPT API
+            answer = call_gpt_api_with_multiple_images(
+                instructions=instructions,
+                prompt=prompt,
+                response_format=genQuestions,
+                img_paths=img_paths
+            )
 
-        # Insert questions into the database
-        for question in questions:
-            sql_con.insert_many_records(table_QAs, [{
-                "id_sample": chunk_id,
-                "question": question['question'],
-                "type_question": question['type'],
-                "type_content": text_type
-            }],overwrite=overwrite)
+            # Parse and process the response
+            answer = json.loads(answer)
+            questions = answer['questions']
+
+            # Insert questions into the database
+            for question in questions:
+                sql_con.insert_many_records(table_QAs, [{
+                    "id_sample": chunk_id,
+                    "question": question['question'],
+                    "type_question": question['type'],
+                    "type_content": text_type
+                }], overwrite=overwrite)
+
+            # Update the progress bar
+            pbar.update(1)
 
     print("Questions generation completed.")
 
 
-
 def generate_answers(sql_con, table_eval_chunks, table_QAs):
     """
-    Generate questions based on chunk content and insert them into the database.
-    
+    Generate answers based on chunk content and insert them into the database.
+
     Args:
         sql_con: SQL connector instance.
         table_eval_chunks: Name of the table containing evaluation chunks.
         table_QAs: Name of the table to store generated questions.
-        table_QAs_schema: Schema of the table for storing QAs.
-        openai_api_key: OpenAI API key for accessing the GPT model.
     """
-    ret_cols = ['doc_type','metadata','merged_content']
+    ret_cols = ['doc_type', 'metadata', 'merged_content']
     # Get all evaluation chunks from the database
     questions = sql_con.get_all_records_as_dict(table_QAs)
 
-    for qa in questions:
-        question = qa["question"]
-        id_q = qa['id_question']
-        id_sample = qa["id_sample"]
-        retrieve_id = {'id_sample':id_sample}
-        doc_type,metadata,merged_content = sql_con.get_record(table_eval_chunks, ret_cols,retrieve_id)  # Get the associated chunk
-        metadata = json.loads(metadata)
-        paths = metadata['path']
+    questions = [q for q in questions if q['expected_answer'] is None]
 
-        if paths in ("", []):
-            img_paths = None
-        else:
-            img_paths = paths
+    # Initialize the progress bar
+    with tqdm(total=len(questions), desc="Generating Answers", unit="answer") as pbar:
+        for qa in questions:
+            question = qa["question"]
+            id_q = qa['id_question']
+            id_sample = qa["id_sample"]
+            retrieve_id = {'id_sample': id_sample}
+            doc_type, metadata, merged_content = sql_con.get_record(
+                table_eval_chunks, ret_cols, retrieve_id
+            )  # Get the associated chunk
+            metadata = json.loads(metadata)
+            paths = metadata['path']
 
-        content = merged_content
+            if paths in ("", []):
+                img_paths = None
+            else:
+                img_paths = paths
 
-        instructions = "You are an AI assistant with expertise in technical and regulatory topics related to building efficiency and funding in Germany. Your task is to analyze the provided context and answer the question in German. Ensure the answer is precise and concise."
+            content = merged_content
 
-        # Prepare the prompt
-        prompt = f"""Answer the following question based on the provided context. Be precise and concise. Answer in **German**.
-        
-        Document: {doc_type}
+            instructions = "You are an AI assistant with expertise in technical and regulatory topics related to building efficiency and funding in Germany. Your task is to analyze the provided context and answer the question in German. Ensure the answer is precise and concise."
 
-        Context:
-        {content}
-        
-        Question:
-        {question}
-        """
+            # Prepare the prompt
+            prompt = f"""Answer the following question based on the provided context. Be precise and concise. Answer in **German**.
+            
+            Document: {doc_type}
 
-        answer = call_gpt_api_with_multiple_images(instructions=instructions,
-                                                 prompt=prompt,
-                                                 response_format=answerFormat,
-                                                 img_paths=img_paths)
-        answer = json.loads(answer)
-        answer_q = answer['answer']
+            Context:
+            {content}
+            
+            Question:
+            {question}
+            """
 
-        # Update the QA table with the answer
-        upd_data = {'expected_answer': answer_q}
-        condition = {'id_question': id_q}
-        
-        sql_con.update_record(table_QAs,upd_data,condition)
+            answer = call_gpt_api_with_multiple_images(
+                instructions=instructions,
+                prompt=prompt,
+                response_format=answerFormat,
+                img_paths=img_paths,
+            )
+            answer = json.loads(answer)
+            answer_q = answer['answer']
 
+            # Update the QA table with the answer
+            upd_data = {'expected_answer': answer_q}
+            condition = {'id_question': id_q}
+            sql_con.update_record(table_QAs, upd_data, condition)
+
+            # Update the progress bar
+            pbar.update(1)
 
     print("Answer generation completed.")
 
