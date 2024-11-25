@@ -228,9 +228,10 @@ class Chat:
             "chat_id" : self.id,
             "message_id" : mid
         }
-        prompt_id = self.db_connector.get_record(table_name = self.messages_table,
+        results = self.db_connector.get_record(table_name = self.messages_table,
                                                  values = values,
                                                  conditions = conditions)
+        prompt_id = results[0]
         # print(f'Prompt id found {prompt_id}')
         conditions_prompt = {'prompt_id':prompt_id}
         values = {column:value}
@@ -250,9 +251,10 @@ class Chat:
             "chat_id" : self.id,
             "message_id" : mid
         }
-        prompt_id = self.db_connector.get_record(table_name = self.messages_table,
+        results = self.db_connector.get_record(table_name = self.messages_table,
                                                  values = values,
                                                  conditions = conditions)
+        prompt_id = results[0]
         # Get prompt to edit -> Retrieve value from messages_table
         values = [column]
         conditions = {
@@ -261,6 +263,8 @@ class Chat:
         column_value = self.db_connector.get_record(table_name = self.prompt_table,
                                             values = values,
                                             conditions = conditions)
+        
+        column_value = column_value[0]
 
         return column_value,prompt_id
 
