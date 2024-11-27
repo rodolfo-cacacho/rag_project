@@ -120,7 +120,7 @@ class answerFormat(BaseModel):
     answer: str
 
 
-def generate_questions(sql_con, table_eval_chunks, table_QAs, table_QAs_schema,overwrite = False):
+def generate_questions(sql_con, table_eval_chunks, table_QAs, table_QAs_schema,table_summaries,overwrite = False):
     """
     Generate questions based on chunk content and insert them into the database.
     
@@ -131,6 +131,7 @@ def generate_questions(sql_con, table_eval_chunks, table_QAs, table_QAs_schema,o
         table_QAs_schema: Schema of the table for storing QAs.
         openai_api_key: OpenAI API key for accessing the GPT model.
     """
+    ret_cols = ['doc_type', 'summary', 'summary_revised']
 
     # Get all evaluation chunks from the database
     chunks = sql_con.get_all_records_as_dict(table_eval_chunks)
@@ -146,7 +147,6 @@ def generate_questions(sql_con, table_eval_chunks, table_QAs, table_QAs_schema,o
     # Filter out chunks that have already been used
     chunks = [chunk for chunk in chunks if chunk["id_sample"] not in used_id_samples]
 
-
     # Initialize the progress bar
     with tqdm(total=len(chunks), desc="Generating Questions", unit="chunk") as pbar:
         for chunk in chunks:
@@ -158,38 +158,53 @@ def generate_questions(sql_con, table_eval_chunks, table_QAs, table_QAs_schema,o
             metadata = json.loads(chunk['metadata'])
             paths = metadata['path']
 
+            retrieve_doc_type = {'doc_type': doc_type}
+            doc_type, summary, summary_revised = sql_con.get_record(
+                table_summaries, ret_cols, retrieve_doc_type
+            ) 
+
             if paths in ("", []):
                 img_paths = None
             else:
                 img_paths = paths
 
             # Instructions for question generation
-            instructions = (
-                "You are an AI assistant with expertise in technical and regulatory topics related to building "
-                "efficiency and funding in Germany. Your task is to analyze the provided context and generate up to "
-                "5 questions in German. Ensure the questions are diverse, relevant, and directly answerable from the "
-                "context. Focus on technical requirements, funding criteria, and procedural details, etc. Avoid "
-                "repetition and ensure clarity in questions."
-            )
+            instructions = """You are an AI assistant specializing in technical and regulatory topics related to building efficiency and funding in Germany. Your task is to analyze the provided context and generate up to 5 diverse, relevant, and specific questions in German.
+
+1. Use the document summary to understand the purpose, scope, and usage of the document.
+2. Ensure all questions are directly tied to the provided context, avoiding ambiguity.
+   - Questions must reference the specific information in the context.
+   - Avoid broad or unspecified questions that could apply to other parts of the document or dataset.
+3. Avoid irrelevant or trivial questions, such as:
+   - Questions about document versions or publication dates.
+   - Questions that are not specific to the provided context.
+4. Focus on generating questions that reflect how this document can be used by experts for regulatory, technical, or planning purposes.
+5. Ensure each question is unique, clear, and adds value to understanding the content."""
+
 
             # Prompt for GPT
-            prompt = f"""Your task is to generate questions from the given context. Follow these instructions:
-1. Generate up to 5 questions in **German**. Every question should be different and not only use different wording. The number of questions should depend on the richness of the content.
-2. Each question must be fully answerable from the given context.
-3. The answers should not contain any links.
-4. The questions should be of moderate difficulty.
-5. The question must be reasonable and must be understood and responded to by humans.
-6. Do not use phrases like 'provided context', etc., in the question.
-7. Questions can be of types:
-   - Factual: Thresholds, limits, or details.
-   - Procedural: Steps or processes.
-   - Analytical: Implications or reasoning.
-8. The questions must be in **German**.
+            prompt = f"""Your task is to generate up to 5 questions based on the provided context and summary of the document. Follow these rules:
 
-Document: {doc_type}
+1. Questions must be in **German** and fully answerable using the provided context.
+2. Use the document summary as a guide to align the questions with the purpose, scope, and usage of the document.
+3. Avoid ambiguous or vague questions. Every question must:
+   - Be specific to the provided context.
+   - Clearly reference the relevant topic or information.
+   - Avoid general phrasing that could apply to other sections or documents.
+4. Avoid irrelevant or trivial questions, such as:
+   - Questions about the document’s version or publication date.
+   - Questions that are not directly tied to the provided context.
+5. Focus on generating questions that align with the following types:
+   - **Factual**: Specific thresholds, limits, or technical details (e.g., "Welche Wärmepumpen erfüllen die technischen Anforderungen der BEG?").
+   - **Procedural**: Steps, processes, or documentation requirements (e.g., "Welche Nachweise sind erforderlich, um Fördermittel zu beantragen?").
+   - **Analytical**: Implications, reasoning, or relationships between requirements (e.g., "Warum ist die Wahl des Kältemittels relevant für die Förderung?").
+6. Ensure the number of questions reflects the richness of the content. Fewer questions are acceptable if the content is limited.
 
-Context: {content}
-"""
+Document Type: {doc_type}
+Summary: {summary}
+
+Context:
+{content}"""
             # Call GPT API
             answer = call_gpt_api_with_multiple_images(
                 instructions=instructions,
@@ -215,6 +230,7 @@ Context: {content}
             pbar.update(1)
 
     print("Questions generation completed.")
+
 
 
 def generate_answers(sql_con, table_eval_chunks, table_QAs):
@@ -252,25 +268,45 @@ def generate_answers(sql_con, table_eval_chunks, table_QAs):
 
             content = merged_content
 
-            instructions = "You are an AI assistant with expertise in technical and regulatory topics related to building efficiency and funding in Germany. Your task is to analyze the provided context and answer the question in German. Ensure the answer is precise and concise."
+            instructions = """You are an AI assistant with expertise in technical and regulatory topics related to building efficiency and funding in Germany. Your task is to generate an expected answer for a given question based on the provided context. This expected answer will act as a guide for evaluating actual answers.
+
+1. The expected answer must:
+   - Be precise, concise, and directly relevant to the question.
+   - Fully cover all key points required to answer the question, based solely on the provided context.
+   - Avoid including information not found in the context, even if it might be generally correct.
+
+2. If the context cannot fully answer the question, explicitly mention what is missing or ambiguous.
+
+3. Structure the expected answer as a **guide**, listing key elements that must be covered.
+
+4. The output must be in **German** and free of ambiguity."""
 
             # Prepare the prompt
-            prompt = f"""Answer the following question based on the provided context. Be precise and concise. Answer in **German**.
-            
-            Document: {doc_type}
+            prompt = f"""Your task is to generate an expected answer for the provided question. This expected answer will act as a guide for evaluating actual answers. Follow these rules:
 
-            Context:
-            {content}
-            
-            Question:
-            {question}
-            """
+1. Base the answer strictly on the provided context. Do not include information outside the context.
+2. The expected answer must:
+   - Be precise and concise.
+   - Fully address the question, covering all relevant points from the context.
+   - Be clear and specific, avoiding ambiguous or overly broad statements.
+3. If the context does not fully address the question, explicitly state what is missing.
+
+### Information Provided:
+- **Document**: {doc_type}
+- **Context**:
+{content}
+
+- **Question**: 
+{question}
+
+Generate the expected answer in **German**."""
 
             answer = call_gpt_api_with_multiple_images(
                 instructions=instructions,
                 prompt=prompt,
                 response_format=answerFormat,
                 img_paths=img_paths,
+                max_tokens=4000
             )
             answer = json.loads(answer)
             answer_q = answer['answer']

@@ -11,7 +11,8 @@ if project_root not in sys.path:
 
 from config import (CONFIG_SQL_DB,DB_NAME,
                     SQL_EVAL_CHUNKS_TABLE,
-                    SQL_EVAL_QAS_TABLE,SQL_EVAL_QAS_TABLE_SCHEMA)
+                    SQL_EVAL_QAS_TABLE,SQL_EVAL_QAS_TABLE_SCHEMA,
+                    SQL_DOC_TYPE_SUMMARIES_TABLE)
 from utils.MySQLDB_manager import MySQLDB
 from testing.modules.testing_modules import generate_questions
 
@@ -21,4 +22,5 @@ generate_questions(sql_con=sql_con,
                    table_eval_chunks=SQL_EVAL_CHUNKS_TABLE,
                    table_QAs=SQL_EVAL_QAS_TABLE,
                    table_QAs_schema=SQL_EVAL_QAS_TABLE_SCHEMA,
+                   table_summaries = SQL_DOC_TYPE_SUMMARIES_TABLE,
                    overwrite=False)

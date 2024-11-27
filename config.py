@@ -160,3 +160,13 @@ SQL_EVAL_QAS_TABLE_SCHEMA = {
     "expected_answer": "longtext",                        # Expected answer (nullable)
     "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",  # Record creation timestamp
 }
+
+SQL_DOC_TYPE_SUMMARIES_TABLE = "doc_type_summaries"
+
+SQL_DOC_TYPE_SUMMARIES_TABLE_SCHEMA = {
+    'id':'int auto_increment primary key',
+    'doc_type':'varchar(255)',
+    'source':'varchar(255)',
+    'summary':'longtext',
+    'summary_revised':'longtext'
+}
