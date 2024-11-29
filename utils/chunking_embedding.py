@@ -405,9 +405,9 @@ def store_vocabulary(vocabulary,schema, sql_con=None, table_name=None, json_path
     if sql_con:
         sql_con.create_table(table_name, schema)
         sql_con.insert_many_records(table_name, vocab_data)
-    elif json_path:
-        with open(json_path, "w", encoding="utf-8") as f:
-            json.dump(vocab_data, f, ensure_ascii=False, indent=4)
+    json_path = os.path.join()
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(vocab_data, f, ensure_ascii=False, indent=4)
 
 
 def embedding_bm25_calculation(table_name,table_store,json_path = None,sql_con = None):

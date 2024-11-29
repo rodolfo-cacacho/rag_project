@@ -20,6 +20,8 @@ sql_con = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 success = 0
 success_exp = 2
 
+print(f"BM25 VOCAB TABLE: {SQL_VOCAB_BM25_TABLE}")
+
 if not sql_con.check_table_exists(SQL_VOCAB_BM25_TABLE):
 
     table_name = SQL_VOCAB_BM25_TABLE+'.json'
@@ -39,6 +41,7 @@ if not sql_con.check_table_exists(SQL_VOCAB_BM25_TABLE):
 else:
     success+=1
 
+print(f"CHUNKS TABLE: {SQL_CHUNK_TABLE}")
 
 if not sql_con.check_table_exists(SQL_CHUNK_TABLE):
 
