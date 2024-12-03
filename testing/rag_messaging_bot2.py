@@ -31,8 +31,8 @@ sql_con = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
 load_dotenv()
 
-API_HASH_TG_RAGTEST = os.getenv('API_HASH_TG_RAGTEST')
-API_ID_TG_RAGTEST = os.getenv('API_ID_TG_RAGTEST')
+API_HASH_TG_RAGTEST = os.getenv('API_HASH_TG_RAGTEST_2')
+API_ID_TG_RAGTEST = os.getenv('API_ID_TG_RAGTEST_2')
 
 # Enum for State Management
 class ChatState(Enum):
@@ -70,12 +70,12 @@ class QuestionFetcher:
 
 # Initialize Pyrogram client for a user account
 app = Client(
-    "my_account",
+    "my_account_2",
     api_id=API_ID_TG_RAGTEST,
     api_hash=API_HASH_TG_RAGTEST
 )
 
-bot_username = BBOT_USER
+bot_username = THWS_BOT_USER
 admin_username = ADMIN_USER
 
 password = os.getenv("AUTH_TELEBOT_PWD")
@@ -239,7 +239,7 @@ def handle_messages(client, message):
             current_question = fetcher.get_current_question()
             app.send_message(admin_username,f"ERROR!! Question {current_question['id_question']} wrong date\n{current_question['question']}")
             set_state(key,ChatState.END)
-            
+
         elif 'Das RAG-System ist abgestürzt'.lower() in message_text:
             # ACTION
             fetcher = get_or_create_fetcher(key)

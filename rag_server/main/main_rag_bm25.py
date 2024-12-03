@@ -169,6 +169,20 @@ class user_query_format2(BaseModel):
     alernate_queries: list[str]
     date_retrieved : str
 
+class rephraseFormat(BaseModel):
+    rephrased_query : str
+    intent : str
+
+class keyTermsFormat(BaseModel):
+    keyterms: list[str]
+    synonyms: list[str]
+
+class alternativeQueriesFormat(BaseModel):
+    alternative_queries: list[str]
+
+class inferredDateFormat(BaseModel):
+    inferredDate : str
+
 class user_query_format_alpha(BaseModel):
     alpha : float
     synonyms: list[str]
@@ -263,14 +277,14 @@ def track_active_user(func):
         try:
             # Update ACTIVE_USER with the user ID from the message
             ACTIVE_USER = message.from_user.id
-            print(f"ACTIVE_USER set to: {ACTIVE_USER}")
+            # print(f"ACTIVE_USER set to: {ACTIVE_USER}")
             
             # Call the actual function
             result = func(message)
             
             # If everything works, set ACTIVE_USER to None
             ACTIVE_USER = None
-            print(f"ACTIVE_USER reset to: {ACTIVE_USER}")
+            # print(f"ACTIVE_USER reset to: {ACTIVE_USER}")
             
             return result
         except Exception as e:
@@ -337,84 +351,186 @@ def simple_llm_query(text,system_instruction = 'You are a helpful assistant.'):
 
     return answer
 
-def preprocess_user_query(user_chat,query,alt_queries = GEN_PROMPTS):
 
-    # system_instructions = f"""You are a specialized system that analyzes user queries and helps extract important information of the query. Do the following 3 tasks: Generate alterantive user prompt, extract key terms and synonyms of user's query and extract date of the query that user is referring to.
-    # 1.	Intent Recognition:
-    # - Identify if the user is asking about requirements, funding, compliance, or technical details.
-    # - Focus on specific terms related to technology (e.g., Wärmepumpen, U-Wert).
-	# 2.	Key Terms:
-    # - Extract key terms related to the subject (e.g., Wärmepumpen, Förderungen, U-Wert).
-	# 3.	Generate Alternate Queries:
-    # - Create {alt_queries} alternate queries using:
-	#     1.	Synonyms or similar terms.
-	#     2.	Different sentence structures.
-	#     - Ensure they maintain the user’s intent and ensure the generated prompts are in ** german **.
-    # 4. Extract key terms mentioned in the prompt, in which the user is interested of knowing about. Give a list of the terms and some synonyms.
-    # 5. Based on the user's prompt, infer the date which is the question talking about. If no date is inferred, respond: "No date found", if yes, say the date in the following format: dd/mm/yyyy. Just answer with the date or the text. When no exact day can inferred, assume last day of the given month. If just the year is mention, say the last day of the year.
-    # If a date in the future is mentioned, return that no date was found. 
-	# 6.	Output:
-    # - List of alternative generated prompts.
-    # - List of key terms and synonyms.
-    # - Extracted date of the user's prompt."""
+def preprocess_user_query(user_chat, query, alt_queries=GEN_PROMPTS):
+    # Define modular tasks
+    def rephrase_and_identify_intent(query):
+        instructions = f"""You are analyzing user queries in German to improve clarity and relevance for retrieving information from the BEG (Bundesförderung für effiziente Gebäude) document corpus. BEG focuses on sustainability and energy efficiency in buildings in Germany. Your tasks are:
+        1. Rephrase the query to ensure it is clear, concise, and accurately reflects the user's intent, while maintaining the original meaning. The rephrased query must be in German.
+        2. Identify the user's intent, such as requirements, funding, compliance, or technical details, to assist in optimizing the query for retrieval.
 
-    system_instructions = f"""You are a system designed to enhance user queries for an information retrieval system using BM25 and Semantic Search. Perform the following tasks on the given query:
+        Output:
+        - Rephrased query in German
+        - Intent of the query (e.g., requirements, funding, compliance, technical details)"""
+        prompt = f"User's query: {query}"
+        response = call_gpt_api_with_single_prompt(instructions=instructions, prompt=prompt, response_format=rephraseFormat)
 
-1. **Error Checking and Rephrasing**:
-   - Review the user's query for any grammatical, spelling, or contextual errors.
-   - Rephrase the query for better clarity and accuracy while maintaining its original intent.
+        answer = json.loads(response)
 
-2. **Intent Recognition**:
-   - Determine the user's intent (e.g., requirements, funding, compliance, technical details).
-   - Highlight terms or topics that suggest the purpose of the query (e.g., "Wärmepumpen", "Förderungen", "U-Wert").
+        rephrased_query = answer['rephrased_query']
+        q_intent = answer['intent']
 
-3. **Key Terms and Synonyms**:
-   - Extract key terms directly relevant to the query.
-   - For each key term, provide a list of synonyms or related terms to improve search coverage.
-
-4. **Query Expansion**:
-   - Generate **{alt_queries}** alternate queries.
-   - Use the rephrased query as the base for expansion.
-   - Avoid using new or big compound words when possible.
-   - Incorporate synonyms, related terms, and varied sentence structures while maintaining the query's original intent.
-   - Ensure all generated queries are in **German**.
-
-5. **Date Extraction**:
-   - Infer any dates mentioned in the user's query.
-   - If no specific day is provided, assume the last day of the mentioned month or year.
-   - If the query refers to a future date, respond with "No date found."
-   - Output dates in the format: dd/mm/yyyy.
-   
-   Output:
-   1. Rephrased query
-   2. Intent of query
-   3. List of Key terms
-   4. List of alternate queries
-   5. Extracted date: "No date found" or dd/mm/yyyy"""
-
-    prompt = f"Analyze the user's question: {query}"
-
-    answer = call_gpt_api_with_single_prompt(instructions=dedent(system_instructions),
-                                             prompt= dedent(prompt),
-                                             response_format= user_query_format2
-                                             )
-
-    answer = json.loads(answer)
-
-    rephrased_query = answer['improved_query']
-    q_intent = answer['intent']
-    keyterms = answer['key_terms']
-    alt_queries = answer['alernate_queries']
-    retrieved_date = answer['date_retrieved']
-
-    retrieved_date = retrieved_date.strip()
+        return rephrased_query,q_intent
     
-    if retrieved_date.replace('.','').lower() != 'no date found':
-        # print(f'Date was updated with: {retrieved_date}')
-        retrieved_date = datetime.strptime(retrieved_date, '%d/%m/%Y')
+    def extract_key_terms(query):
+        instructions = """Extract key terms from the user's query that are relevant to the BEG (Bundesförderung für effiziente Gebäude) document corpus, which focuses on sustainability and energy efficiency in buildings in Germany. For each key term, provide appropriate synonyms or related terms that could enhance search coverage within this context.
+
+        Ensure:
+        1. Key terms are domain-specific and reflect concepts commonly found in the BEG corpus.
+        2. Synonyms are relevant and accurate for German-language queries.
+
+        Output:
+        - Key terms
+        - Synonyms for each term"""
+        
+        prompt = f"Query: {query}"
+        response = call_gpt_api_with_single_prompt(instructions=instructions, prompt=prompt, response_format=keyTermsFormat)
+        
+        try:
+            answer = json.loads(response)
+            keyterms = answer.get('keyterms', []) or []  # Default to empty list if None
+            synonyms = answer.get('synonyms', []) or []  # Default to empty list if None
+            key_terms = list(set(keyterms + synonyms))
+        except (json.JSONDecodeError, TypeError, KeyError):
+            # If parsing fails or keys are missing, return an empty list
+            key_terms = []
+        
+        return key_terms
+    
+    def generate_alternate_queries(query, alt_queries):
+        instructions = f"""Generate {alt_queries} alternate queries in German, using synonyms, varied sentence structures, and maintaining the original intent of the query. The queries should be optimized for retrieving information from the BEG (Bundesförderung für effiziente Gebäude) document corpus, which focuses on sustainability and energy efficiency in buildings in Germany.
+
+        Ensure that:
+        1. All alternate queries remain in German.
+        2. Synonyms and variations reflect terms and structures commonly used in the context of the BEG corpus.
+        3. The original intent and clarity of the query are preserved.
+
+        Output:
+        - {alt_queries} alternate queries in German."""
+        prompt = f"Base query: {query}"
+        response = call_gpt_api_with_single_prompt(instructions=instructions, prompt=prompt, response_format=alternativeQueriesFormat)
+
+        answer = json.loads(response)
+        alt_queries = answer.get('alternative_queries', []) or []  # Default to empty list if None
+
+        return alt_queries
+    
+    def extract_and_validate_date(query):
+        instructions = """
+        Task:
+        Your goal is to extract the relevant date from the user’s query based on the timeframe they are referring to.
+
+        Rules:
+        1. Analyze the user’s query for explicit or implicit temporal references (e.g., “in 2022,” “as of March 2020”).
+        2. Identify the timeframe the user is asking about, focusing on when they want information (not when the document was created or cited).
+        3. Exclude dates that are part of document citations or standards (e.g., “DIN 4108-2: 2013-02”) unless explicitly mentioned as the user’s timeframe of interest.
+        4. If the query mentions a past date or time:
+        - Infer the date as the **last day** of the mentioned month or year.
+        - Format the date as `dd/mm/yyyy`.
+        - Example: “in 2022” → `31/12/2022`, “in March 2020” → `31/03/2020`.
+        5. If no timeframe can be inferred or the query refers to a future date:
+        - Respond with “No date found.”
+        - Example: “What will be valid in 2030?” → “No date found.”
+        """
+        prompt = f"Query: {query}"
+        response = call_gpt_api_with_single_prompt(instructions=instructions, prompt=prompt, response_format=inferredDateFormat)
+        
+        extracted_date = json.loads(response).get("inferredDate", "No date found").strip()
+              
+        if extracted_date.replace('.', '').lower() != 'no date found' and extracted_date != "Norm Date":
+            return datetime.strptime(extracted_date, '%d/%m/%Y')
+        return None
+
+    # Execute tasks
+    rephrased_query,q_intent = rephrase_and_identify_intent(query)
+
+    key_terms = extract_key_terms(query)
+    alt_queries_a = generate_alternate_queries(rephrased_query, alt_queries)
+    retrieved_date = extract_and_validate_date(query)
+
+    if retrieved_date:
         user_chat.update_project_date(retrieved_date)
 
-    return user_chat.date_project,rephrased_query,alt_queries,keyterms,q_intent
+    return user_chat.date_project, rephrased_query, alt_queries_a, key_terms, q_intent
+
+# def preprocess_user_query(user_chat,query,alt_queries = GEN_PROMPTS):
+
+#     # system_instructions = f"""You are a specialized system that analyzes user queries and helps extract important information of the query. Do the following 3 tasks: Generate alterantive user prompt, extract key terms and synonyms of user's query and extract date of the query that user is referring to.
+#     # 1.	Intent Recognition:
+#     # - Identify if the user is asking about requirements, funding, compliance, or technical details.
+#     # - Focus on specific terms related to technology (e.g., Wärmepumpen, U-Wert).
+# 	# 2.	Key Terms:
+#     # - Extract key terms related to the subject (e.g., Wärmepumpen, Förderungen, U-Wert).
+# 	# 3.	Generate Alternate Queries:
+#     # - Create {alt_queries} alternate queries using:
+# 	#     1.	Synonyms or similar terms.
+# 	#     2.	Different sentence structures.
+# 	#     - Ensure they maintain the user’s intent and ensure the generated prompts are in ** german **.
+#     # 4. Extract key terms mentioned in the prompt, in which the user is interested of knowing about. Give a list of the terms and some synonyms.
+#     # 5. Based on the user's prompt, infer the date which is the question talking about. If no date is inferred, respond: "No date found", if yes, say the date in the following format: dd/mm/yyyy. Just answer with the date or the text. When no exact day can inferred, assume last day of the given month. If just the year is mention, say the last day of the year.
+#     # If a date in the future is mentioned, return that no date was found. 
+# 	# 6.	Output:
+#     # - List of alternative generated prompts.
+#     # - List of key terms and synonyms.
+#     # - Extracted date of the user's prompt."""
+
+#     system_instructions = f"""You are a system designed to enhance user queries for an information retrieval system using BM25 and Semantic Search. Perform the following tasks on the given query:
+
+# 1. **Error Checking and Rephrasing**:
+#    - Review the user's query for any grammatical, spelling, or contextual errors.
+#    - Rephrase the query for better clarity and accuracy while maintaining its original intent.
+
+# 2. **Intent Recognition**:
+#    - Determine the user's intent (e.g., requirements, funding, compliance, technical details).
+#    - Highlight terms or topics that suggest the purpose of the query (e.g., "Wärmepumpen", "Förderungen", "U-Wert").
+
+# 3. **Key Terms and Synonyms**:
+#    - Extract key terms directly relevant to the query.
+#    - For each key term, provide a list of synonyms or related terms to improve search coverage.
+
+# 4. **Query Expansion**:
+#    - Generate **{alt_queries}** alternate queries.
+#    - Use the rephrased query as the base for expansion.
+#    - Avoid using new or big compound words when possible.
+#    - Incorporate synonyms, related terms, and varied sentence structures while maintaining the query's original intent.
+#    - Ensure all generated queries are in **German**.
+
+# 5. **Date Extraction**:
+#    - Infer any dates mentioned in the user's query.
+#    - If no specific day is provided, assume the last day of the mentioned month or year.
+#    - If the query refers to a future date, respond with "No date found."
+#    - Output dates in the format: dd/mm/yyyy.
+   
+#    Output:
+#    1. Rephrased query
+#    2. Intent of query
+#    3. List of Key terms
+#    4. List of alternate queries
+#    5. Extracted date: "No date found" or dd/mm/yyyy"""
+
+#     prompt = f"Analyze the user's question: {query}"
+
+#     answer = call_gpt_api_with_single_prompt(instructions=dedent(system_instructions),
+#                                              prompt= dedent(prompt),
+#                                              response_format= user_query_format2
+#                                              )
+
+#     answer = json.loads(answer)
+
+#     rephrased_query = answer['improved_query']
+#     q_intent = answer['intent']
+#     keyterms = answer['key_terms']
+#     alt_queries = answer['alernate_queries']
+#     retrieved_date = answer['date_retrieved']
+
+#     retrieved_date = retrieved_date.strip()
+    
+#     if retrieved_date.replace('.','').lower() != 'no date found':
+#         # print(f'Date was updated with: {retrieved_date}')
+#         retrieved_date = datetime.strptime(retrieved_date, '%d/%m/%Y')
+#         user_chat.update_project_date(retrieved_date)
+
+#     return user_chat.date_project,rephrased_query,alt_queries,keyterms,q_intent
 
 def process_user_query(query,key_terms):
 
@@ -1099,6 +1215,7 @@ def echo_all(message,user_chat):
             return
         
         date_project,new_query,alt_queries,keyterms,q_intent = preprocess_user_query(user_chat,query=input_text)
+        # print(f"{date_project} - {new_query}\n{alt_queries}\n\n{keyterms} - {q_intent}")
 
         dates_files = get_dates_documents(date_project,date_database)
  

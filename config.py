@@ -59,6 +59,7 @@ BBOT_USER = '@BundesBau_bot'
 THWS_BOT_USER = '@ThwsBauBot'
 BOT_TEST_USER = '@ragtesting'
 NOTIFY_USER = '@rodolfocco'
+ADMIN_USER = '@rodolfoccr'
 TESTING_USERS = ['ragtesting','rodolfocco']
 
 # MySQL CONFIG
