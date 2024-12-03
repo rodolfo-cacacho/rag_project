@@ -200,6 +200,41 @@ class MySQLDB:
 
         return None
     
+    def get_records(self, table_name, values, conditions):
+        """
+        Retrieve all records matching specific values and conditions, returning as a list of dictionaries.
+        """
+        # Build the SELECT clause
+        select_clause = ', '.join(values)
+
+        # Prepare the WHERE clause
+        where_clauses = []
+        condition_values = []
+
+        for col, val in conditions.items():
+            if isinstance(val, (list, tuple)):  # Handle IN clause
+                placeholders = ', '.join(['%s'] * len(val))
+                where_clauses.append(f"{col} IN ({placeholders})")
+                condition_values.extend(val)
+            else:  # Handle standard equality
+                where_clauses.append(f"{col} = %s")
+                condition_values.append(val)
+
+        where_clause = ' AND '.join(where_clauses)
+
+        # Construct the query
+        query = f"SELECT {select_clause} FROM {table_name} WHERE {where_clause}"
+
+        # Execute the query
+        self.cursor.execute(f"USE {self.database_name}")
+        self.cursor.execute(query, condition_values)
+
+        # Fetch all records
+        rows = self.cursor.fetchall()
+
+        # Convert to list of dictionaries
+        return [dict(zip(values, row)) for row in rows]
+    
     def get_record_by_id(self, table_name, record_id):
         self.cursor.execute(f"USE {self.database_name}")
         self.cursor.execute(f"SELECT * FROM {table_name} WHERE id = %s", (record_id,))
@@ -272,6 +307,37 @@ class MySQLDB:
         records = [dict(zip(columns, row)) for row in rows]
         
         return records
+    
+    def check_table_and_count(self, table_name):
+        """
+        Checks if a table exists and returns the number of records in it.
+
+        :param table_name: Name of the table to check.
+        :return: A tuple (exists, count), where `exists` is True if the table exists and `count` is the number of records.
+                If the table does not exist, `count` will be None.
+        """
+        try:
+            # Check if the table exists
+            self.cursor.execute(f"USE {self.database_name}")
+            query = """
+                SELECT COUNT(*)
+                FROM information_schema.tables
+                WHERE table_schema = %s
+                AND table_name = %s
+            """
+            self.cursor.execute(query, (self.database_name, table_name))
+            exists = self.cursor.fetchone()[0] > 0
+
+            if not exists:
+                return False, None
+
+            # Count the number of records if the table exists
+            self.cursor.execute(f"SELECT COUNT(*) FROM {table_name}")
+            count = self.cursor.fetchone()[0]
+            return True, count
+        except Exception as e:
+            print(f"Error checking table or counting records: {e}")
+            return False, None
     
     def close(self):
         self.cursor.close()

@@ -1,6 +1,6 @@
 # RAG CONFIGURATIONS
 
-MAX_TOKENS = 500
+MAX_TOKENS = 250
 SUFFIX = 'clean'
 
 
@@ -22,11 +22,12 @@ EMBEDDING_MODELS = {
                                    "retrieve_task":None,
                                    "api_usage":False}}
 
-EMBEDDING_MODEL = "aari1995/German_Semantic_V3"
+EMBEDDING_MODEL = "jinaai/jina-embeddings-v2-base-de"
 EMBEDDING_MODEL_NAME = EMBEDDING_MODEL.split("/")[1].replace('_','-').lower()
 EMBEDDING_MODEL_DIM = EMBEDDING_MODELS[EMBEDDING_MODEL]["dimension"]
 EMBEDDING_MODEL_API = EMBEDDING_MODELS[EMBEDDING_MODEL]["api_usage"]
 EMBEDDING_MODEL_RET_TASK = EMBEDDING_MODELS[EMBEDDING_MODEL]["retrieve_task"]
+EMBEDDING_MODEL_EMB_TASK = EMBEDDING_MODELS[EMBEDDING_MODEL]["embed_task"]
  
 INDEX_NAME = f'{EMBEDDING_MODEL_NAME}-{SUFFIX}-{MAX_TOKENS}'
 
@@ -49,9 +50,16 @@ METADATA_FILE_PATH = f'{METADATA_DIR}/Files_date_version.csv'
 
 USERS_SERVERS = ['root','ubuntu']
 
+TG_SESSION_PATH = 'testing/sessions'
+
 # Bot CONFIG
 
 BOT_NAME = 'THWS Bau Bot'
+BBOT_USER = '@BundesBau_bot'
+THWS_BOT_USER = '@ThwsBauBot'
+BOT_TEST_USER = '@ragtesting'
+NOTIFY_USER = '@rodolfocco'
+TESTING_USERS = ['ragtesting','rodolfocco']
 
 # MySQL CONFIG
 CONFIG_SQL_DB = {
@@ -103,13 +111,15 @@ SQL_MESSAGES_TABLE_SCHEMA = {
     'message': 'longtext NOT NULL',
     'date': 'TIMESTAMP DEFAULT CURRENT_TIMESTAMP',
     'reply_message_id': 'BIGINT NULL',
-    'prompt_id': 'BIGINT NULL, FOREIGN KEY (prompt_id) REFERENCES prompts(prompt_id) ON DELETE SET NULL'
+    'prompt_id': 'BIGINT NULL, FOREIGN KEY (prompt_id) REFERENCES prompts(prompt_id) ON DELETE SET NULL',
+    'device':'VARCHAR(20), FOREIGN KEY (device) REFERENCES prompts(device) on DELETE SET NULL'
 }
 
 SQL_PROMPTS_TABLE = 'prompts'
 
 SQL_PROMPTS_TABLE_SCHEMA = {
     'prompt_id': 'BIGINT AUTO_INCREMENT PRIMARY KEY',
+    'device': "VARCHAR(20)",
     'chat_id': 'BIGINT NOT NULL',
     'question': 'longtext NOT NULL',
     'context': 'longtext',
@@ -133,7 +143,8 @@ SQL_PROMPTS_TABLE_SCHEMA = {
     'alpha_value': 'float',
     'improved_query':'longtext',
     'query_intent':'longtext',
-    'keyterms':'longtext'
+    'keyterms':'longtext',
+    'setting':'varchar(100)'
 }
 
 SQL_EVAL_CHUNKS_TABLE = "eval_chunks"
@@ -159,6 +170,15 @@ SQL_EVAL_QAS_TABLE_SCHEMA = {
     "question": "longtext",                      # Generated question
     "expected_answer": "longtext",                        # Expected answer (nullable)
     "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",  # Record creation timestamp
+    "sim": "VARCHAR(500)",
+    "sim_worth":"BOOLEAN DEFAULT FALSE",
+    "clarity":"int",
+    "relevance":"int",
+    "specificity":"int",
+    "clarity_q":"int",
+    "relevance_q":"int",
+    "specificity_q":"int",
+    "valid":"BOOLEAN DEFAULT FALSE"
 }
 
 SQL_DOC_TYPE_SUMMARIES_TABLE = "doc_type_summaries"
@@ -169,4 +189,20 @@ SQL_DOC_TYPE_SUMMARIES_TABLE_SCHEMA = {
     'source':'varchar(255)',
     'summary':'longtext',
     'summary_revised':'longtext'
+}
+
+SQL_DOCUMENTS_TABLE = 'table_documents'
+
+# Constants for table and schema
+TEST_RESULTS_TABLE = "test_results"
+
+TEST_RESULTS_SCHEMA = {
+    "id": "INT AUTO_INCREMENT PRIMARY KEY",
+    "prompt_id": "bigint",
+    "device": "VARCHAR(20)",
+    "test_name": "VARCHAR(255)",
+    "id_question": "INT",
+    "status": "ENUM('pending', 'success', 'error') DEFAULT 'pending'",
+    "error_message": "TEXT",
+    "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
 }

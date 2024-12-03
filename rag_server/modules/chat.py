@@ -35,7 +35,7 @@ class Chat:
 }
         self.gpt_history.append(default_gpt_message)
 
-    def add_message(self, role, content, message_id, reply_to = None, prompt_id=None):
+    def add_message(self, role, content, message_id, reply_to = None, prompt_id=None,device = None):
         """
         Add a message to the Messages table and cache it in memory.
         """
@@ -47,7 +47,8 @@ class Chat:
             "chat_id": self.id,
             'reply_message_id':reply_to,
             "message_id": message_id,
-            "prompt_id": prompt_id
+            "prompt_id": prompt_id,
+            "device":device
         }
 
         # Add to the in-memory history
@@ -66,7 +67,9 @@ class Chat:
                    q_intent,improved_query,
                    alpha_value = None,
                    gen_prompts = None,
-                   evaluation = None, comment = None):
+                   evaluation = None, comment = None,
+                   setting = "Default",
+                   device = None):
         """
         Save a GPT prompt to the database and associate with chat.
         """
@@ -100,6 +103,7 @@ class Chat:
 
 
         prompt_entry = {
+            "device": device,
             "chat_id": self.id,
             "question": question,
             "context": context_string,
@@ -122,7 +126,8 @@ class Chat:
             'alpha_value': alpha_value,
             'improved_query':improved_query,
             'query_intent':q_intent,
-            'keyterms':keyterms
+            'keyterms':keyterms,
+            'setting':setting
         }
 
         # Insert the prompt into the Prompts table
@@ -133,7 +138,8 @@ class Chat:
             for message_id in messages_id:
                 # Prepare the data to update the message record with the prompt_id
                 update_data = {
-                    "prompt_id": prompt_id
+                    "prompt_id": prompt_id,
+                    "device": device
                 }
                 update_filter = {
                     "chat_id" : self.id,
@@ -223,7 +229,7 @@ class Chat:
     def edit_prompt_eval(self,mid,value,column,append = False):
 
         # Get prompt to edit -> Retrieve value from messages_table
-        values = ['prompt_id']
+        values = ['prompt_id','device']
         conditions = {
             "chat_id" : self.id,
             "message_id" : mid
@@ -232,8 +238,10 @@ class Chat:
                                                  values = values,
                                                  conditions = conditions)
         prompt_id = results[0]
+        device = results[1]
         # print(f'Prompt id found {prompt_id}')
-        conditions_prompt = {'prompt_id':prompt_id}
+        conditions_prompt = {'prompt_id':prompt_id,
+                             'device':device}
         values = {column:value}
         self.db_connector.update_record(table_name = self.prompt_table,
                                         update_data = values,
@@ -241,12 +249,12 @@ class Chat:
                                         append = append)
 
         # print('editting values')
-        return prompt_id
+        return prompt_id,device
     
     def extract_data_mid_prompt(self,mid,column):
 
         # Get prompt to edit -> Retrieve value from messages_table
-        values = ['prompt_id']
+        values = ['prompt_id','device']
         conditions = {
             "chat_id" : self.id,
             "message_id" : mid
@@ -255,10 +263,12 @@ class Chat:
                                                  values = values,
                                                  conditions = conditions)
         prompt_id = results[0]
+        device = results[1]
         # Get prompt to edit -> Retrieve value from messages_table
         values = [column]
         conditions = {
-            "prompt_id" : prompt_id
+            "prompt_id" : prompt_id,
+            "device": device
         }
         column_value = self.db_connector.get_record(table_name = self.prompt_table,
                                             values = values,
@@ -266,7 +276,22 @@ class Chat:
         
         column_value = column_value[0]
 
-        return column_value,prompt_id
+        return column_value,prompt_id,device
+    
+    def retrieve_last_prompt_id(self):
+
+        values = ['prompt_id','device']
+        conditions = {"chat_id": self.id}
+
+
+        records = self.db_connector.get_records(table_name = self.prompt_table,
+                                      values = values,
+                                      conditions = conditions)
+        last_record = records[-1]
+        prompt_id = last_record['prompt_id']
+        device = last_record['device']
+
+        return prompt_id,device
 
     
 class ChatManager:

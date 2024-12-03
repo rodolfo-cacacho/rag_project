@@ -18,6 +18,7 @@ from rag_server.modules.rag_retrieval_bm25 import retrieve_context,get_dates_doc
 from rag_server.modules.user_manager import add_user_to_db,is_user_allowed,get_allowed_users
 from dotenv import load_dotenv
 import pandas as pd
+import spacy
 from utils.MySQLDB_manager import MySQLDB
 from utils.pinecone_hybrid_connector import PineconeDBConnectorHybrid
 from utils.embedding_handler import EmbeddingHandler
@@ -45,15 +46,21 @@ from config import (DB_NAME,CONFIG_SQL_DB,METADATA_FILE_PATH,BOT_NAME,
                     SQL_USER_TABLE_SCHEMA,SQL_USER_TABLE,
                     SQL_MESSAGES_TABLE,SQL_MESSAGES_TABLE_SCHEMA,
                     SQL_PROMPTS_TABLE,SQL_PROMPTS_TABLE_SCHEMA,
-                    MX_RESULTS,DIST_THRESHOLD,MX_RESULTS_QUERY,USERS_SERVERS)
+                    MX_RESULTS,DIST_THRESHOLD,MX_RESULTS_QUERY,USERS_SERVERS,
+                    TESTING_USERS)
+
+
+nlp = spacy.load('de_core_news_lg')
 
 load_dotenv()
 
 
 API_KEY_CGPT = os.getenv('API_KEY_CGPT')
 if getpass.getuser() in USERS_SERVERS:
+    DEVICE = "SERVER"
     API_KEY_TG = os.getenv('API_KEY_TG')
 else:
+    DEVICE = "LOCAL"
     API_KEY_TG = os.getenv('API_KEY_TG_BBOT')
 del getpass
 AUTH_TELEBOT_PWD = os.getenv('AUTH_TELEBOT_PWD')
@@ -463,7 +470,7 @@ def update_date_conversation(user_chat,query='Text'):
     
     return user_chat.date_project
 
-def send_long_message(bot, message, answer, user_chat, prompt_id = None,markup=None,max_length=4000):
+def send_long_message(bot, message, answer, user_chat, prompt_id = None,device = None,markup=None,max_length=4000):
     """
     Helper function to send a long message in chunks and store each reply.
     """
@@ -481,7 +488,7 @@ def send_long_message(bot, message, answer, user_chat, prompt_id = None,markup=N
         replied_msg = bot.reply_to(message, chunk,reply_markup = markup_send)
 
         # Store the reply message in the chat history
-        user_chat.add_message(role='assistant', content=chunk, message_id=replied_msg.id, reply_to=message.id,prompt_id = prompt_id)
+        user_chat.add_message(role='assistant', content=chunk, message_id=replied_msg.id, reply_to=message.id,prompt_id = prompt_id,device = device)
 
         # Append the sent message to the list of sent messages
         messages_sent.append(replied_msg)
@@ -505,7 +512,7 @@ def store_reply_message(bot, message, message_bot, user_chat):
     # Return the replied message (in case further processing is needed)
     return replied_msg
 
-def store_sent_message(bot, message_bot_content, user_chat,prompt_id = None, reply_markup=None):
+def store_sent_message(bot, message_bot_content, user_chat,prompt_id = None,device=None, reply_markup=None):
     """
     Helper function to send a bot message and store it in the chat history.
     
@@ -524,13 +531,13 @@ def store_sent_message(bot, message_bot_content, user_chat,prompt_id = None, rep
         sent_msg = bot.send_message(user_chat.id, i, reply_markup=reply_markup)
 
         # Store the sent message in the chat history
-        user_chat.add_message(role='assistant', content=i, message_id=sent_msg.id,prompt_id = prompt_id)
+        user_chat.add_message(role='assistant', content=i, message_id=sent_msg.id,prompt_id = prompt_id,device = device)
         messages_sent.append(sent_msg)
 
     # Return the sent message object (in case further processing is needed)
     return messages_sent
 
-def store_sent_image(bot, image_path, user_chat, caption=None, reply_markup=None, prompt_id=None):
+def store_sent_image(bot, image_path, user_chat, caption=None, reply_markup=None, prompt_id=None,device=None):
     """
     Helper function to send an image and store it in the chat history.
     
@@ -556,7 +563,8 @@ def store_sent_image(bot, image_path, user_chat, caption=None, reply_markup=None
         role='assistant', 
         content=f'Sent image: {image_path}', 
         message_id=sent_msg.id, 
-        prompt_id=prompt_id
+        prompt_id=prompt_id,
+        device = device
     )
 
     # Return the sent message object (in case further processing is needed)
@@ -826,6 +834,8 @@ def ask_question_with_context_json(conversation,question,context):
 @track_active_user
 @store_user_message
 def get_access(message,user_chat):
+    global user_send_pwd
+    print(f"Before {user_send_pwd}")
 
     exist_user,allowed_user = is_user_allowed(db = sql_db_connector,
                                               telegram_username= user_chat.user,
@@ -835,7 +845,9 @@ def get_access(message,user_chat):
 
     if allowed_user == 'False':
         message_bot = f'Willkommen {user_chat.name} bei {BOT_NAME}! Du darfst nicht chatten, bitte gib das Passwort ein, um Zugriff auf den Bot zu erhalten.'
-        user_send_pwd.append(user_chat.user)
+        user_send_pwd.append(user_chat.id)
+        print(f"Before {user_send_pwd}")
+
     elif exist_user == 'True' and allowed_user == 'True':
         message_bot = f"Willkommen {user_chat.name} bei {BOT_NAME}! Du darfst bereits chatten."
     if exist_user == 'False':
@@ -873,6 +885,11 @@ def send_reset(message,user_chat):
 
     message_bot = f"Deine Gesprächshistorie wird zurückgesetzt!"
     replied_msg = store_reply_message(bot,message,message_bot,user_chat)
+    if user_chat.user in TESTING_USERS:
+        # retrieve last prompt id  / device
+        prompt_id,device = user_chat.retrieve_last_prompt_id()
+        message_bot = f"{prompt_id}|{device} "
+        replied_msg = store_reply_message(bot,message,message_bot,user_chat)
     user_chat.reset_gpt_conversation_history()
 
 # Define a handler for the /reset command
@@ -880,6 +897,7 @@ def send_reset(message,user_chat):
 @track_active_user
 @store_user_message
 def send_cancel(message,user_chat):
+    global user_send_pwd
 
     message_bot = f"Vorgang abgebrochen!"
     replied_msg = store_reply_message(bot,message,message_bot,user_chat)
@@ -907,7 +925,7 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "Antwort ist Ja")
         bot.edit_message_text(chat_id=user_id, message_id=mid,
                           text=text_message, reply_markup=yes_markup())
-        prompt_id = user_chat.edit_prompt_eval(mid = str(mid),
+        prompt_id,device = user_chat.edit_prompt_eval(mid = str(mid),
                                    value = 'good',
                                    column = 'evaluation')
         # bot.delete_message(cid,mid)
@@ -916,7 +934,7 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "Antwort ist Nein")
         bot.edit_message_text(chat_id=user_id, message_id=mid,
                           text=text_message, reply_markup=no_markup())
-        prompt_id = user_chat.edit_prompt_eval(mid = str(mid),
+        prompt_id,device = user_chat.edit_prompt_eval(mid = str(mid),
                                    value = 'bad',
                                    column = 'evaluation')
     elif call.data == "show_context":
@@ -924,7 +942,7 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "Kontext wird angezeigt")
         bot.edit_message_text(chat_id = user_id, message_id = mid,text = text_message,reply_markup = None)
 
-        context,prompt_id = user_chat.extract_data_mid_prompt(mid = str(mid),column = 'context_used')
+        context,prompt_id,device = user_chat.extract_data_mid_prompt(mid = str(mid),column = 'context_used')
 
         if context:  # Check if context is not NULL or empty
             context_long_text = context  # This is the long TEXT stored in the database
@@ -934,7 +952,8 @@ def callback_query(call):
                               message=message_call,
                               answer='Kontext:',
                               user_chat= user_chat,
-                              prompt_id=prompt_id)
+                              prompt_id=prompt_id,
+                              device=device)
             time.sleep(0.1)
 
             context_list_ids = [j.lower().replace(' ', '') for i in context_list for j in i['ids']]
@@ -951,10 +970,10 @@ def callback_query(call):
                 message_i = f'Kontext: {source_i} - {pages_i} - {text_i[:10]} - {path_i}'
 
                 message_send = f"Quelle: {i['source']} Seiten: {pages_i}\n{i['text']}"
-                send_messages = store_sent_message(bot,message_send,user_chat,prompt_id)
+                send_messages = store_sent_message(bot,message_send,user_chat,prompt_id,device=device)
                 if len(path_i)>0:
                     for img in path_i:
-                        img_send = store_sent_image(bot,img,user_chat,prompt_id=prompt_id)
+                        img_send = store_sent_image(bot,img,user_chat,prompt_id=prompt_id,device=device)
                         print('send image!!!!!')
 
             time.sleep(0.1)
@@ -963,6 +982,7 @@ def callback_query(call):
                     answer='War der angezeigte Kontext hilfreich?',
                     user_chat= user_chat,
                     prompt_id=prompt_id,
+                    device=device,
                     markup=gen_markup_evaluate_context())
             
 
@@ -970,7 +990,7 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "Antwort ist Ja")
         bot.edit_message_text(chat_id=user_id, message_id=mid,
                     text=text_message, reply_markup=yes_markup())
-        prompt_id = user_chat.edit_prompt_eval(mid = str(mid),
+        prompt_id,device = user_chat.edit_prompt_eval(mid = str(mid),
                             value = 'good',
                             column = 'context_eval')
 
@@ -979,7 +999,7 @@ def callback_query(call):
         bot.answer_callback_query(call.id, "Antwort ist Nein")
         bot.edit_message_text(chat_id=user_id, message_id=mid,
             text=text_message, reply_markup=no_markup())
-        prompt_id = user_chat.edit_prompt_eval(mid = str(mid),
+        prompt_id,device = user_chat.edit_prompt_eval(mid = str(mid),
                             value = 'bad',
                             column = 'context_eval')
 
@@ -996,14 +1016,15 @@ def reply_msg(message,user_chat):
 
     comment = message.text
 
-    prompt_id = user_chat.edit_prompt_eval(mid = str(message.reply_to_message.message_id),
+    prompt_id,device = user_chat.edit_prompt_eval(mid = str(message.reply_to_message.message_id),
                                value = comment,
                                column = "comment",
                                append = True)
     
     # Add prompt id to message
     update_data = {
-        'prompt_id':prompt_id
+        'prompt_id':prompt_id,
+        'device':device
     }
     conditions = {
         'chat_id':user_chat.id,
@@ -1020,6 +1041,7 @@ def reply_msg(message,user_chat):
 @track_active_user
 @store_user_message
 def echo_all(message,user_chat):
+    global user_send_pwd
     global authorized_users
     message_rcvd = message.text
     message_id = message.message_id
@@ -1093,7 +1115,8 @@ def echo_all(message,user_chat):
                 keyterms = keyterms,
                 vocab_table = SQL_VOCAB_BM25_TABLE,
                 alpha_value=ALPHA_VALUE,
-                embed_handler=embed_handler
+                embed_handler=embed_handler,
+                nlp=nlp
                 )
 
             results = build_context(results,sql_db_connector,SQL_CHUNK_TABLE)
@@ -1135,7 +1158,9 @@ def echo_all(message,user_chat):
                     alpha_value = ALPHA_VALUE,
                     keyterms = keyterms,
                     q_intent = q_intent,
-                    improved_query = new_query
+                    improved_query = new_query,
+                    setting = usage_setting,
+                    device = DEVICE
                     )
             user_chat.reset_gpt_conversation_history(total = False)
 
@@ -1150,6 +1175,8 @@ def echo_all(message,user_chat):
 #########################################################################
 
 if __name__ == "__main__":
+    global usage_setting
+    usage_setting = sys.argv[1] if len(sys.argv) > 1 else "Default Usage"
     manage_bot(bot)
 
    

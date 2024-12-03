@@ -40,7 +40,7 @@ class PineconeDBConnectorHybrid:
         for i in range(0, len(vectors), batch_size):
             batch = vectors[i:i + batch_size]
             self.index.upsert(vectors=batch)
-            print(f"Uploaded batch {i // batch_size + 1}/{(len(vectors) + batch_size - 1) // batch_size}")
+            # print(f"Uploaded batch {i // batch_size + 1}/{(len(vectors) + batch_size - 1) // batch_size}")
 
     def query_collection(self, query_embedding_dense, query_embedding_sparse=None, n_results=5, include_metadata=True, where=None):
         """

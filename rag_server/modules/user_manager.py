@@ -17,7 +17,11 @@ def add_user_to_db(db, username, user_id, name, allowed=True,user_db_table = SQL
             'date_edit': current_date,
             'allowed': allowed
         }
-        db.update_record(user_db_table, user_id, update_data)
+        update_user = {
+            'id': user_id
+        }
+        print(f"Allowing User: {update_data} {update_user}")
+        db.update_record(user_db_table, update_data,update_user)
     else:
         # Add a new user if they don't exist
         record = {

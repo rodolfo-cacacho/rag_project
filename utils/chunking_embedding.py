@@ -1,33 +1,16 @@
+import os
 from utils.document_cleaning import pre_clean_text,post_clean_document
 from utils.tokens_lemmatization import extract_tokens_lemm_stop,clean_extracted_values_to_tokens
+from config import (SQL_DOCUMENTS_TABLE,SQL_CHUNK_TABLE_SCHEMA,SQL_VOCAB_BM25_TABLE_SCHEMA)
 from semantic_text_splitter import TextSplitter
 from tokenizers import Tokenizer
 import json
 import re
 from collections import defaultdict,Counter
-import openai
 import pandas as pd
 from collections import Counter
 import Levenshtein
-import tqdm
-
-
-API_KEY_CGPT = "sk-proj-FrNMaLZT7tgBftIDPuBOT3BlbkFJFND9eOXtUMeCyWxplFlV"
-openai.api_key = API_KEY_CGPT
-
-# Config and initialization
-config = {
-    'user': 'root',
-    'password': 'admin123',
-    'host': '127.0.0.1'
-}
-db_name = 'data_rag'
-table_documents_name = 'table_documents'
-table_retrieval_schema = {
-'id': 'varchar(10) NOT NULL PRIMARY KEY',
-'content': 'longtext NOT NULL',
-'metadata': 'longtext NOT NULL'
-}
+from tqdm import tqdm
 
 def process_metadata_csv(metadata_csv_path):
 
@@ -43,7 +26,7 @@ def process_metadata_csv(metadata_csv_path):
 
     return df_codes
 
-def load_documents_pages(sql_con,table = table_documents_name):
+def load_documents_pages(sql_con,table = SQL_DOCUMENTS_TABLE):
 
     records = sql_con.get_all_records_as_dict(table)
     docs = []
@@ -165,8 +148,8 @@ def semantic_chunking(sql_con,
                       df_code_path,
                       max_tokens = 500,
                       output_dir = '.',
-                      table_documents_name = table_documents_name,
-                      table_chunks_schema = table_retrieval_schema,
+                      table_documents_name = SQL_DOCUMENTS_TABLE,
+                      table_chunks_schema = SQL_CHUNK_TABLE_SCHEMA,
                       tokenizer_embed_model = "jinaai/jina-embeddings-v2-base-de",
                       pdf_type_chunked = ['Technische FAQ BEG EM']):
     
@@ -186,177 +169,181 @@ def semantic_chunking(sql_con,
     - str: The cleaned text
     """
     chunks_total_upserted = 0
+    # CHECK IF ALREADY EXISTS?
 
-    docs = load_documents_pages(sql_con = sql_con,
-                                table = table_documents_name)
-    
-    # docs = docs[:n_limit]
-    
-    df_codes = process_metadata_csv(df_code_path)
+    exist, count = sql_con.check_table_and_count(table_chunks_name)
 
-    # Maximum number of tokens in a chunk
-    tokenizer = Tokenizer.from_pretrained(tokenizer_embed_model)
-    splitter = TextSplitter.from_huggingface_tokenizer(tokenizer, max_tokens)
+    if exist and count > 0:
+        print(f"Chunks {max_tokens} already calculated.")
 
-    sql_con.delete_table(table_chunks_name)
-    sql_con.create_table(table_chunks_name,table_chunks_schema)
+        return count
 
-    print(f'Documents: {len(docs)}')
+    else:
 
-    for idoc,doc in enumerate(docs,start=1):
-
-        # Get document type using first page
-        chunks_list = []
-        doc_type = doc[0]['pdf_type']
-        # print(f"Document {doc[0]['pdf_name']} : Pages {len(doc)}")
-
-        if doc_type not in pdf_type_chunked:
+        docs = load_documents_pages(sql_con = sql_con,
+                                    table = table_documents_name)
         
-            # Gotta merge the document here:::
-            pages_list = []
+        df_codes = process_metadata_csv(df_code_path)
 
-            for page in doc:
-                pages_list.append((page['content'],page['type']))
+        # Maximum number of tokens in a chunk
+        tokenizer = Tokenizer.from_pretrained(tokenizer_embed_model)
+        splitter = TextSplitter.from_huggingface_tokenizer(tokenizer, max_tokens)
 
-            merged_doc = merge_pages(pages_list)
+        sql_con.delete_table(table_chunks_name)
+        sql_con.create_table(table_chunks_name,table_chunks_schema)
 
-            # print(f'Merged Pages {len(pages_list)}\n{merged_doc}\n\n')
+        print(f'Documents: {len(docs)}')
 
-            # CHUNKING #
-            chunks = splitter.chunks(merged_doc)
-            # print(f'Total Chunks {len(chunks)}')
-            print(f"Document {doc[0]['pdf_name']} : Pages {len(doc)} : Chunks {len(chunks)}")
+        for idoc,doc in enumerate(docs,start=1):
+
+            # Get document type using first page
+            chunks_list = []
+            doc_type = doc[0]['pdf_type']
+            # print(f"Document {doc[0]['pdf_name']} : Pages {len(doc)}")
+
+            if doc_type not in pdf_type_chunked:
+            
+                # Gotta merge the document here:::
+                pages_list = []
+
+                for page in doc:
+                    pages_list.append((page['content'],page['type']))
+
+                merged_doc = merge_pages(pages_list)
+
+                # print(f'Merged Pages {len(pages_list)}\n{merged_doc}\n\n')
+
+                # CHUNKING #
+                chunks = splitter.chunks(merged_doc)
+                # print(f'Total Chunks {len(chunks)}')
+                print(f"Document {doc[0]['pdf_name']} : Pages {len(doc)} : Chunks {len(chunks)}")
 
 
-            act_page = [0]  # Track the last matched page index
+                act_page = [0]  # Track the last matched page index
 
-            for ichunk,chunk in enumerate(chunks):
-                # print(f'Chunk {ichunk}\nActual pages {act_page}.')
-                metadata = []
-                chunk_content = chunk.split()
-                word_count_chunk = len(chunk_content)
+                for ichunk,chunk in enumerate(chunks):
+                    # print(f'Chunk {ichunk}\nActual pages {act_page}.')
+                    metadata = []
+                    chunk_content = chunk.split()
+                    word_count_chunk = len(chunk_content)
 
-                act_page_content = load_act_pages(act_page,doc)
-                
-                while len(chunk_content) > len(act_page_content):
-                    act_page.append(act_page[-1]+1)
                     act_page_content = load_act_pages(act_page,doc)
-                # if len(chunk_content)==len(act_page_content):
-                #     print('MATCH')
-                # print(f'Chunk_words:{chunk_content}\nAct_page_words:{act_page_content}\nAct pages: {act_page}\n')
+                    
+                    while len(chunk_content) > len(act_page_content):
+                        act_page.append(act_page[-1]+1)
+                        act_page_content = load_act_pages(act_page,doc)
+                    # if len(chunk_content)==len(act_page_content):
+                    #     print('MATCH')
+                    # print(f'Chunk_words:{chunk_content}\nAct_page_words:{act_page_content}\nAct pages: {act_page}\n')
 
-                # We will remove words from the page content only if they match sequentially with the chunk content
-                match_index = 0  # Keeps track of how many words from the chunk have matched
+                    # We will remove words from the page content only if they match sequentially with the chunk content
+                    match_index = 0  # Keeps track of how many words from the chunk have matched
 
-                # Start comparing words from the chunk with words from the page content
-                while match_index < len(chunk_content) and match_index < len(act_page_content):
-                    if chunk_content[match_index] == act_page_content[match_index]:
-                        # If the words match, move to the next word in both the chunk and the page
-                        match_index += 1
-                    else:
-                        # If the words don't match, stop the matching process
-                        break
-                
-                # Remove matched words from the start of act_page_content
-                act_page_content = act_page_content[match_index:]
-
-                for page in act_page:
-                    metadata.append(doc[page]['metadata'])
-
-                if len(act_page_content) > 0:
-                    new_pages_act = act_page.copy()
-                    for i,page in enumerate(act_page):
-                        if i == len(act_page) - 1:
-                            doc[page]['content'] = ' '.join(act_page_content)
+                    # Start comparing words from the chunk with words from the page content
+                    while match_index < len(chunk_content) and match_index < len(act_page_content):
+                        if chunk_content[match_index] == act_page_content[match_index]:
+                            # If the words match, move to the next word in both the chunk and the page
+                            match_index += 1
                         else:
-                            doc[page]['content'] = ''
-                            new_pages_act.pop(0)
-                    act_page = new_pages_act
-                else:
-                    for i in act_page:
-                        doc[i]['content'] = ''
-                    act_page = [act_page[-1]+1]
-
-                metadata = [json.loads(x) for x in metadata]
-                metadata = merge_metadata(metadata)
-                pdf_name = metadata["source"]
-                matched_row = df_codes[df_codes['file'] == pdf_name]
-                # Check if any rows were found
-                if not matched_row.empty:
-                    # Extract type_key and file_key from the matched row (assuming there's only one match)
-                    metadata["type_key"] = int(matched_row["type_key"].iloc[0])
-                    metadata["file_key"] = int(matched_row["file_key"].iloc[0])
-                else:
-                    # If no match found, set type_key and file_key to 0
-                    metadata["type_key"] = 0
-                    metadata["file_key"] = 0
-
-                doc_id = f'{idoc}.{ichunk}'
-                last_id = f'{idoc}.{len(chunks) - 1}'
+                            # If the words don't match, stop the matching process
+                            break
                     
-                updated_metadata = metadata.copy()  # Copy the metadata to avoid modifying the original
-                updated_metadata['id'] = doc_id
-                updated_metadata['last_id'] = last_id
-                updated_metadata['word_count'] = word_count_chunk
+                    # Remove matched words from the start of act_page_content
+                    act_page_content = act_page_content[match_index:]
+
+                    for page in act_page:
+                        metadata.append(doc[page]['metadata'])
+
+                    if len(act_page_content) > 0:
+                        new_pages_act = act_page.copy()
+                        for i,page in enumerate(act_page):
+                            if i == len(act_page) - 1:
+                                doc[page]['content'] = ' '.join(act_page_content)
+                            else:
+                                doc[page]['content'] = ''
+                                new_pages_act.pop(0)
+                        act_page = new_pages_act
+                    else:
+                        for i in act_page:
+                            doc[i]['content'] = ''
+                        act_page = [act_page[-1]+1]
+
+                    metadata = [json.loads(x) for x in metadata]
+                    metadata = merge_metadata(metadata)
+                    pdf_name = metadata["source"]
+                    matched_row = df_codes[df_codes['file'] == pdf_name]
+                    # Check if any rows were found
+                    if not matched_row.empty:
+                        # Extract type_key and file_key from the matched row (assuming there's only one match)
+                        metadata["type_key"] = int(matched_row["type_key"].iloc[0])
+                        metadata["file_key"] = int(matched_row["file_key"].iloc[0])
+                    else:
+                        # If no match found, set type_key and file_key to 0
+                        metadata["type_key"] = 0
+                        metadata["file_key"] = 0
+
+                    doc_id = f'{idoc}.{ichunk}'
+                    last_id = f'{idoc}.{len(chunks) - 1}'
+                        
+                    updated_metadata = metadata.copy()  # Copy the metadata to avoid modifying the original
+                    updated_metadata['id'] = doc_id
+                    updated_metadata['last_id'] = last_id
+                    updated_metadata['word_count'] = word_count_chunk
+                        
+                    chunk_dict = {'id':doc_id,
+                                'content':chunk,
+                                'metadata':json.dumps(updated_metadata,ensure_ascii=False)}
                     
-                chunk_dict = {'id':doc_id,
-                              'content':chunk,
-                              'metadata':json.dumps(updated_metadata,ensure_ascii=False)}
+                    # Upsert to DB!!!
+                    chunks_list.append(chunk_dict)
                 
-                # Upsert to DB!!!
-                chunks_list.append(chunk_dict)
-            
-        else: 
+            else: 
 
-            print(f"Document {doc[0]['pdf_name']} : Pages {len(doc)} : Chunks {len(chunks)}")
-            
+                print(f"Document {doc[0]['pdf_name']} : Pages {len(doc)} : Chunks {len(chunks)}")
+                
 
-            for ichunk,chunk in enumerate(doc):
+                for ichunk,chunk in enumerate(doc):
 
-                chunk_content = chunk['content'].split()
-                word_count = len(chunk_content)
+                    chunk_content = chunk['content'].split()
+                    word_count = len(chunk_content)
 
-                metadata = chunk['metadata']
-                metadata = json.loads(metadata)
-                pdf_name = metadata["source"]
-                matched_row = df_codes[df_codes['file'] == pdf_name]
-                # Check if any rows were found
-                if not matched_row.empty:
-                    # Extract type_key and file_key from the matched row (assuming there's only one match)
-                    metadata["type_key"] = int(matched_row["type_key"].iloc[0])
-                    metadata["file_key"] = int(matched_row["file_key"].iloc[0])
-                else:
-                    # If no match found, set type_key and file_key to 0
-                    metadata["type_key"] = 0
-                    metadata["file_key"] = 0
+                    metadata = chunk['metadata']
+                    metadata = json.loads(metadata)
+                    pdf_name = metadata["source"]
+                    matched_row = df_codes[df_codes['file'] == pdf_name]
+                    # Check if any rows were found
+                    if not matched_row.empty:
+                        # Extract type_key and file_key from the matched row (assuming there's only one match)
+                        metadata["type_key"] = int(matched_row["type_key"].iloc[0])
+                        metadata["file_key"] = int(matched_row["file_key"].iloc[0])
+                    else:
+                        # If no match found, set type_key and file_key to 0
+                        metadata["type_key"] = 0
+                        metadata["file_key"] = 0
 
-                doc_id = f'{idoc}.{ichunk}'
-                last_id = f'{idoc}.{len(doc) - 1}'
-                    
-                updated_metadata = metadata.copy()  # Copy the metadata to avoid modifying the original
-                updated_metadata['id'] = doc_id
-                updated_metadata['last_id'] = last_id
-                updated_metadata['word_count'] = word_count
+                    doc_id = f'{idoc}.{ichunk}'
+                    last_id = f'{idoc}.{len(doc) - 1}'
+                        
+                    updated_metadata = metadata.copy()  # Copy the metadata to avoid modifying the original
+                    updated_metadata['id'] = doc_id
+                    updated_metadata['last_id'] = last_id
+                    updated_metadata['word_count'] = word_count
 
-                chunk_dict = {'id':doc_id,
-                              'content':chunk['content'],
-                              'metadata':json.dumps(updated_metadata,ensure_ascii=False)}
-                    
-                # Upsert to DB!!!
-                chunks_list.append(chunk_dict)
+                    chunk_dict = {'id':doc_id,
+                                'content':chunk['content'],
+                                'metadata':json.dumps(updated_metadata,ensure_ascii=False)}
+                        
+                    # Upsert to DB!!!
+                    chunks_list.append(chunk_dict)
 
 
-        ids_upserted = sql_con.insert_many_records(table_name = table_chunks_name,
-                                    records = chunks_list,
-                                    overwrite = False)
+            ids_upserted = sql_con.insert_many_records(table_name = table_chunks_name,
+                                        records = chunks_list,
+                                        overwrite = False)
 
-        chunks_total_upserted += len(ids_upserted)
+            chunks_total_upserted += len(ids_upserted)
 
-    sql_con.export_table(table_name = table_chunks_name,
-                        export_format = 'json',
-                        output_dir = output_dir)
-
-    return chunks_total_upserted
+        return chunks_total_upserted
 
 
 def get_table_data_as_dict(sql_con=None, json_path=None, table_name=None):
@@ -382,6 +369,12 @@ def get_table_data_as_dict(sql_con=None, json_path=None, table_name=None):
     
     return records
 
+def store_chunks(chunks,table_name, json_path='.'):
+
+    json_path = os.path.join(json_path,f'{table_name}.json')
+    with open(json_path, "w", encoding="utf-8") as f:
+        json.dump(chunks, f, ensure_ascii=False, indent=4)
+
 def store_vocabulary(vocabulary,schema, sql_con=None, table_name=None, json_path=None):
     """
     Stores the vocabulary in MySQL or as a JSON file.
@@ -405,12 +398,12 @@ def store_vocabulary(vocabulary,schema, sql_con=None, table_name=None, json_path
     if sql_con:
         sql_con.create_table(table_name, schema)
         sql_con.insert_many_records(table_name, vocab_data)
-    json_path = os.path.join()
+    json_path = os.path.join(json_path,f'{table_name}.json')
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(vocab_data, f, ensure_ascii=False, indent=4)
 
 
-def embedding_bm25_calculation(table_name,table_store,json_path = None,sql_con = None):
+def emb25_voc_analysis(table_name,nlp,json_path = None,sql_con = None):
     """
     Function to clean and calculate the embeddings
 
@@ -421,9 +414,10 @@ def embedding_bm25_calculation(table_name,table_store,json_path = None,sql_con =
                                      json_path=json_path,
                                      table_name=table_name)
     
-    records = records[:500]
-    
+    print("Done retrieving Records")
+
     voc_analyzer = WordFrequencyAnalyzer()
+    progress_bar = tqdm(total=len(records), desc="Processing and cleaning Chunks")
     
     for irecord,record in enumerate(records):
 
@@ -433,12 +427,47 @@ def embedding_bm25_calculation(table_name,table_store,json_path = None,sql_con =
         clean_content,extracted_values = post_clean_document(content)
         record['clean_content'] = clean_content
         record['extracted_values'] = extracted_values
-        tokens_content = extract_tokens_lemm_stop(clean_content)
+        tokens_content = extract_tokens_lemm_stop(clean_content,nlp=nlp)
         record['tokens'] = tokens_content
-        new_tokens = clean_extracted_values_to_tokens(extracted_values)
+        new_tokens = clean_extracted_values_to_tokens(extracted_values,nlp=nlp)
         record['tokens'].extend(new_tokens)
         tokens = record['tokens']
         voc_analyzer.update_words(tokens)
+        progress_bar.update(1)
+
+    # Example vocabulary
+    vocabulary = [word for word,freq in voc_analyzer.word_frequencies.items()]
+
+    return records,vocabulary,voc_analyzer
+
+def embedding_bm25_calculation(table_name,table_store,nlp,json_path = None,sql_con = None,bm25_sql_schema = SQL_VOCAB_BM25_TABLE_SCHEMA):
+    """
+    Function to clean and calculate the embeddings
+
+    :param table_name (str):
+    """
+
+    exist, count = sql_con.check_table_and_count(table_store)
+
+    records = get_table_data_as_dict(sql_con=sql_con,
+                                    json_path=json_path,
+                                    table_name=table_name)
+    
+    voc_analyzer = WordFrequencyAnalyzer()
+    progress_bar = tqdm(total=len(records), desc="Processing and cleaning Chunks")
+    for irecord,record in enumerate(records):
+
+        content = record['content']
+        clean_content,extracted_values = post_clean_document(content)
+        record['clean_content'] = clean_content
+        record['extracted_values'] = extracted_values
+        tokens_content = extract_tokens_lemm_stop(clean_content,nlp=nlp)
+        record['tokens'] = tokens_content
+        new_tokens = clean_extracted_values_to_tokens(extracted_values,nlp=nlp)
+        record['tokens'].extend(new_tokens)
+        tokens = record['tokens']
+        voc_analyzer.update_words(tokens)
+        progress_bar.update(1)
 
     # Example vocabulary
     vocabulary = [word for word,freq in voc_analyzer.word_frequencies.items()]
@@ -469,22 +498,17 @@ def embedding_bm25_calculation(table_name,table_store,json_path = None,sql_con =
     # Step 3: Create BM25 vectors
     chunk_vectors = create_chunk_vectors(records, vocabulary)
 
-    bm25_schema =     {
-            "id": "INT NOT NULL PRIMARY KEY",
-            "word": "VARCHAR(255) NOT NULL",
-            "idf": "FLOAT",
-            "synonyms": "LONGTEXT"
-        }
+    if exist == False or count == 0:
 
-    sql_con.delete_table(table_store)
+        sql_con.delete_table(table_store)
 
-    store_vocabulary(vocabulary=vocabulary,
-                     sql_con=sql_con,
-                     table_name=table_store,
-                     json_path=json_path,
-                     schema = bm25_schema)
-    
-    del bm25_schema
+        store_vocabulary(vocabulary=vocabulary,
+                        sql_con=sql_con,
+                        table_name=table_store,
+                        json_path=json_path,
+                        schema = bm25_sql_schema)
+        
+    del bm25_sql_schema
     del vocabulary
     del voc_analyzer
     
@@ -503,9 +527,9 @@ def embedding_bm25_calculation(table_name,table_store,json_path = None,sql_con =
         content_record = record['content']
         sparse_vector_record = chunk_vectors_dict.get(id_record, {"indices": [], "values": []})  # Default to empty sparse vector
         embed_dict = {'id':id_record,
-                      'content':content_record,
-                      'sparse_vector':sparse_vector_record,
-                      'metadata':metadata_record}
+                    'content':content_record,
+                    'sparse_vector':sparse_vector_record,
+                    'metadata':metadata_record}
         upsert_list.append(embed_dict)
 
     del chunk_vectors_dict
@@ -891,6 +915,14 @@ def process_and_upload(
         batch_size_embedding (int): Number of chunks to process in each embedding batch.
         batch_size_upsert (int): Number of vectors to upload to Pinecone in each upsert batch.
     """
+    regs = pinecone_connector.count_registers()
+
+    if regs == len(chunks):
+        print(f"Embeddings for {pinecone_connector.index_name} already calculated.")
+        return
+        
+    pinecone_connector.reset_collection()
+
     total_chunks = len(chunks)  # Total number of chunks
     progress_bar = tqdm(total=total_chunks, desc="Processing and Uploading Chunks")
 

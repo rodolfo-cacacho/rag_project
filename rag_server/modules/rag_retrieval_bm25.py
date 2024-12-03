@@ -12,10 +12,7 @@ from utils.tokens_lemmatization import extract_tokens_lemm_stop,clean_extracted_
 import Levenshtein
 
 
-# Load German stopwords and the German spaCy model
-nltk.download('stopwords')
-german_stopwords = set(stopwords.words('german'))
-nlp = spacy.load("de_core_news_sm")
+nlp = spacy.load("de_core_news_lg")
 
 
 def get_dates_documents(input_date, date_database):
@@ -166,7 +163,7 @@ def preprocess_vocabulary(vocabulary_list):
     return vocab_dict
 
 
-def bm25_query_vectors(queries, vocab_dict, k1=1.5, similarity_threshold=0.90,n_grams = [2,3]):
+def bm25_query_vectors(queries, vocab_dict,nlp, k1=1.5, similarity_threshold=0.90,n_grams = [2,3]):
     """
     Generates BM25 sparse vectors for multiple queries with fuzzy matching.
 
@@ -233,13 +230,13 @@ def bm25_query_vectors(queries, vocab_dict, k1=1.5, similarity_threshold=0.90,n_
 
         return best_match
 
-    def process_query(query):
+    def process_query(query,nlp):
         """Generates a BM25 sparse vector for a single query."""
         # Step 1: Preprocess and tokenize the query
         clean_query, query_terms = post_clean_document(query)  # Tokenize and preprocess the query
-        tokens_query = extract_tokens_lemm_stop(clean_query)
+        tokens_query = extract_tokens_lemm_stop(clean_query,nlp=nlp)
         ngrams = create_query_ngrams(tokens_query,n_grams)
-        query_terms = clean_extracted_values_to_tokens(query_terms)
+        query_terms = clean_extracted_values_to_tokens(query_terms,nlp=nlp)
         query_tokens = tokens_query + query_terms + ngrams
 
         # Step 2: Count the frequency of each query token
@@ -271,59 +268,9 @@ def bm25_query_vectors(queries, vocab_dict, k1=1.5, similarity_threshold=0.90,n_
         return {'indices': indices, 'values': values}
 
     # Process all queries and generate sparse vectors
-    sparse_vectors = [process_query(query) for query in queries]
+    sparse_vectors = [process_query(query,nlp) for query in queries]
     return sparse_vectors
 
-def bm25_query_vectors_original(queries, vocab_dict, k1=1.5):
-    """
-    Generates BM25 sparse vectors for multiple queries.
-
-    Parameters:
-    - queries: list of str, the input queries.
-    - vocab_dict: dict, preprocessed vocabulary dictionary with words as keys and {'id': id, 'idf': idf} as values.
-    - k1: float, BM25 term frequency saturation parameter (default=1.5).
-
-    Returns:
-    - sparse_vectors: list of dict, each sparse BM25 vector in the format {'indices': [...], 'values': [...]}.
-    """
-
-    def process_query(query):
-        """Generates a BM25 sparse vector for a single query."""
-        # Step 1: Preprocess and tokenize the query
-        clean_query, query_terms = post_clean_document(query)  # Tokenize and preprocess the query
-        tokens_query = extract_tokens_lemm_stop(clean_query)
-        query_terms = clean_extracted_values_to_tokens(query_terms)
-        query_tokens = tokens_query + query_terms
-
-        # Step 1: Count the frequency of each query token
-        term_frequencies = Counter(query_tokens)
-
-        # Step 2: Prepare indices and values for the sparse vector
-        indices = []
-        values = []
-        processed_ids = set()  # To avoid duplicates for terms/synonyms pointing to the same ID
-
-        for term, tf in term_frequencies.items():
-            if term in vocab_dict:  # Check if the term or its synonym exists in the vocabulary
-                vocab_entry = vocab_dict[term]
-                term_id = vocab_entry['id']  # Get the term ID
-                idf = vocab_entry['idf']  # Get the term's IDF value
-
-                # Calculate the BM25 score for this term
-                bm25_score = idf * ((tf * (k1 + 1)) / (tf + k1))
-
-                # Add the term ID and its score if not already processed
-                if term_id not in processed_ids:
-                    indices.append(term_id)
-                    values.append(bm25_score)
-                    processed_ids.add(term_id)
-
-        # Step 3: Return the sparse vector
-        return {'indices': indices, 'values': values}
-
-    # Process all queries and generate sparse vectors
-    sparse_vectors = [process_query(query) for query in queries]
-    return sparse_vectors
 
 def hybrid_scale(dense, sparse, alpha: float = 1.0):
     # check alpha value is in range
@@ -341,7 +288,8 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
                      embed_task,sql_table,alpha_value,
                      vocab_table,query,gen_prompts,
                      keyterms,max_results,retrieve_date_documents,
-                     max_results_query,distance_threshold = 0.5):
+                     max_results_query,nlp,
+                     distance_threshold = 0.5):
     
     distance_threshold = 0
 
@@ -371,7 +319,7 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
     # print(f"{queries} {len(queries)}")
 
     # print("Sparse vectors")
-    sparse_vectors = bm25_query_vectors(queries,vocabulary_bm25)
+    sparse_vectors = bm25_query_vectors(queries,vocabulary_bm25,nlp=nlp)
     # print("Sparse vectors done")
 
     dense_vectors = embed_handler.embed_texts(texts = queries,
@@ -614,11 +562,12 @@ def build_context(context,sql_connector,table_name):
         flattened_pages = []
         for entry in context_i['pages']:
             # Use regex to find numeric parts
-            numbers = re.findall(r'\d+\.\d+|\d+', entry)
+            str_entry = str(entry)
+            numbers = re.findall(r'\d+\.\d+|\d+', str_entry)
             
             # If any non-numeric text is present, capture it and exit the loop
-            if not numbers or any(not part.isdigit() for part in entry.replace(",", "").split()):
-                non_numeric_texts.append(entry)
+            if not numbers or any(not part.isdigit() for part in str_entry.replace(",", "").split()):
+                non_numeric_texts.append(str_entry)
                 continue
             
             # Otherwise, extend the list with numeric parts as integers

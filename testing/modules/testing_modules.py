@@ -10,6 +10,8 @@ import math
 import base64
 from dotenv import load_dotenv
 from tqdm import tqdm
+import numpy as np
+from sklearn.metrics.pairwise import cosine_similarity
 
 # Set the seed
 seed_value = 15
@@ -401,4 +403,362 @@ def call_gpt_api_with_multiple_images(instructions, prompt, model="gpt-4o-2024-0
 def encode_image(image_path):
   with open(image_path, "rb") as image_file:
     return base64.b64encode(image_file.read()).decode('utf-8')
+  
+
+def evaluate_q_similarity(db, table_name, embedding_handler, threshold=0.95):
+    """
+    Evaluate the similarity of questions in the database and update the similarity column.
+
+    Args:
+        db (MySQLDB): An instance of the MySQLDB class for database operations.
+        table_name (str): The name of the table containing the questions.
+        embedding_handler (EmbeddingHandler): An instance of the EmbeddingHandler for embedding text.
+        threshold (float): The similarity threshold for grouping questions.
+    """
+    # Step 1: Retrieve all questions from the database
+    questions_data = db.get_all_records_as_dict(table_name)
+    if not questions_data:
+        print("No questions found in the database.")
+        return
+
+    # Extract the questions and their IDs
+    question_ids = [row['id_question'] for row in questions_data]
+    questions = [row['question'] for row in questions_data]
+
+    # Step 2: Embed the questions
+    embeddings = np.array(embedding_handler.embed_texts(questions))
+
+    # Step 3: Compute the cosine similarity matrix
+    similarity_matrix = cosine_similarity(embeddings)
+
+    # Step 4: Group similar questions based on the threshold
+    similarity_results = {}
+    for i, row in enumerate(similarity_matrix):
+        # Pair similarity scores with question IDs
+        similar_pairs = [
+            (question_ids[j], sim) for j, sim in enumerate(row) if sim > threshold and i != j
+        ]
+        # Sort by similarity score in descending order
+        similar_pairs = sorted(similar_pairs, key=lambda x: x[1], reverse=True)
+        # Store only question IDs, excluding self
+        similar_question_ids = [qid for qid, _ in similar_pairs]
+        similarity_results[question_ids[i]] = similar_question_ids
+
+    # Step 5: Update the database with the similarity results
+    for question_id, similar_ids in similarity_results.items():
+        db.update_record(
+            table_name,
+            update_data={'sim': ",".join(map(str, similar_ids))},
+            conditions={'id_question': question_id},
+            append=True  # Ensure that updates can append to the field if needed
+        )
+    print("Similarity evaluation and updates are complete.")
+
+class askIDsFormat(BaseModel):
+    worth_asking: list[int]
+
+
+
+def llm_eval_similarity(sql_con, qas_table):
+    """
+    Prepare prompts for evaluating the most worth-asking questions from similar question groups.
+    Tracks pairwise comparisons to avoid redundant evaluations and updates the database.
+
+    Args:
+        sql_con: Database connection object.
+        qas_table: Name of the questions table in the database.
+    """
+    # Step 1: Retrieve all questions from the database
+    questions_eval = sql_con.get_all_records_as_dict(qas_table)
+
+    # Filter only the questions with similarity groups
+    questions_sim = [question for question in questions_eval if question['sim']]
+
+    # Step 2: Initialize comparison tracking dictionary
+    comparison_dict = {q['id_question']: set() for q in questions_eval}
+
+    # Initialize progress bar
+    progress_bar = tqdm(total=len(questions_sim), desc="Processing Questions")
+
+    # Prepare prompts for each group
+    for question_data in questions_sim:
+        question_id = question_data['id_question']
+        similar_ids = question_data['sim'].split(",")
+        similar_ids = [int(sim_id) for sim_id in similar_ids]
+
+        # Filter out already compared questions
+        unprocessed_ids = [
+            sim_id for sim_id in similar_ids if sim_id not in comparison_dict[question_id]
+        ]
+
+        # Skip if no new comparisons to process
+        if not unprocessed_ids:
+            progress_bar.update(1)
+            continue
+
+        # Collect the main question and its unprocessed similar ones
+        main_question = f"Question {question_id}: '{question_data['question']}'"
+        similar_questions = [
+            f"Question {sim_id}: '{questions_eval[sim_id - 1]['question']}'"  # Adjust indexing as needed
+            for sim_id in unprocessed_ids
+        ]
+
+        # Mark these questions as compared for both the main and similar questions
+        for sim_id in unprocessed_ids:
+            comparison_dict[question_id].add(sim_id)
+            comparison_dict[sim_id].add(question_id)
+
+        instructions = """You are an AI assistant with expertise in technical and regulatory topics related to building efficiency and funding in Germany.
+        You are tasked with evaluating a group of questions to determine which are worth asking. Use the following criteria to make your decisions:
+        1. Clarity:
+        - Is the question clearly phrased and easy to understand?
+        - Avoid vague, ambiguous, or overly complex questions.
+        2. Specificity:
+        - Does the question require detailed, precise, and focused answers?
+        - Avoid overly broad or generic questions.
+        3. Relevance:
+        - Does the question align with the context or task it pertains to?
+        - Ensure the question matches the intended dataset or domain.
+        4. Uniqueness:
+        - Does the question provide unique value compared to others in the group?
+        - Avoid redundant questions that seek similar or overlapping information."""
+
+        # Construct the prompt
+        prompt_similitude = f"""
+        You are given a group of similar questions. Evaluate which questions are the most worth asking based on clarity, specificity, and relevance to the context. Return the list with the questions worth asking.
+
+        Here are the questions:
+        {main_question}
+        {chr(10).join(similar_questions)}
+
+        Choose the top question and any other significantly different and worth asking. Avoid questions deemed too similar.
+        """
+
+        # Call the GPT API to get worth-asking question IDs
+        response = call_gpt_api_with_multiple_images(
+            instructions=instructions,
+            prompt=prompt_similitude,
+            max_tokens=500,
+            response_format=askIDsFormat
+        )
+
+        # Parse and process the response
+        answer = json.loads(response)
+        ids_worth_asking = answer['worth_asking']
+
+        # Update the database for the worth-asking questions
+        for qid in ids_worth_asking:
+            sql_con.update_record(
+                table_name=qas_table,
+                update_data={'sim_worth': True},  # Set the flag to True
+                conditions={'id_question': qid}
+            )
+
+        # Debug print the processed IDs
+        # print(f"Processed Question ID {question_id}, Worth Asking IDs: {ids_worth_asking}")
+
+        # Update progress bar
+        progress_bar.update(1)
+
+    progress_bar.close()
+    print(f"All prompts have been processed. Database updated with worth-asking questions.")
+
+class scoreQuestion(BaseModel):
+    clarity: int
+    specificity: int
+    relevance: int
+
+def llm_eval_question_answers(sql_con, qas_table):
+    """
+    Evaluate questions using clarity, specificity, and relevance criteria, and update scores in the database.
+    Filters out questions with sim != "" and sim_worth not equal to 1 or True.
+
+    Args:
+        sql_con: Database connection object.
+        qas_table: Name of the questions table in the database.
+    """
+    # Step 1: Retrieve all questions from the database
+    questions_eval = sql_con.get_all_records_as_dict(qas_table)
+
+    # Step 2: Filter questions
+    filtered_questions = [
+        question for question in questions_eval
+        if not (question['sim'] and not question['sim_worth'])
+    ]
+
+    # Initialize progress bar
+    progress_bar = tqdm(total=len(filtered_questions), desc="Evaluating Questions")
+
+    for question_data in filtered_questions:
+        question_id = question_data['id_question']
+        question_text = question_data['question']
+        expected_answer = question_data.get('expected_answer', "No answer provided.")
+
+        # Construct the prompt for the LLM
+        prompt_eval = f"""Evaluate the following question based on the criteria below and provide a score (1-5) for each:
+        1. Clarity:
+        - Is the question clearly phrased and easy to understand?
+        - Avoid vague, ambiguous, or overly complex questions.
+        2. Specificity:
+        - Does the question require detailed, precise, and focused answers?
+        - Avoid overly broad or generic questions.
+        3. Relevance:
+        - Does the question align with the context or task it pertains to?
+        - Ensure the question matches the intended dataset or domain.
+
+        Question: {question_text}
+
+        Expected Answer: {expected_answer}
+        """
+
+        # Call GPT API to get scores
+        response = call_gpt_api_with_multiple_images(
+            instructions="You are an AI assistant with expertise in technical and regulatory topics related to building efficiency and funding in Germany. Evaluate the question on clarity, relevance, and specificity.",
+            prompt=prompt_eval,
+            max_tokens=500,
+            response_format=scoreQuestion
+        )
+
+        # Parse the response
+        answer = json.loads(response)
+        clarity = answer['clarity']
+        specificity = answer['specificity']
+        relevance = answer['relevance']
+
+        # Update the database with the scores
+        sql_con.update_record(
+            table_name=qas_table,
+            update_data={
+                'clarity': clarity,
+                'specificity': specificity,
+                'relevance': relevance
+            },
+            conditions={'id_question': question_id}
+        )
+
+        # Debug print the processed question and scores (optional)
+        # print(f"Processed Question ID {question_id}, Scores: Clarity={clarity}, Specificity={specificity}, Relevance={relevance}")
+
+        # Update progress bar
+        progress_bar.update(1)
+
+    # Close the progress bar
+    progress_bar.close()
+
+    print(f"All {len(filtered_questions)} questions have been evaluated and updated.")
+
+def llm_eval_question(sql_con, qas_table):
+    """
+    Evaluate questions using clarity, specificity, and relevance criteria, and update scores in the database.
+    Filters out questions with sim != "" and sim_worth not equal to 1 or True.
+
+    Args:
+        sql_con: Database connection object.
+        qas_table: Name of the questions table in the database.
+    """
+    # Step 1: Retrieve all questions from the database
+    questions_eval = sql_con.get_all_records_as_dict(qas_table)
+
+    # Step 2: Filter questions
+    filtered_questions = [
+        question for question in questions_eval
+        if not (question['sim'] and not question['sim_worth'])
+    ]
+
+    # Initialize progress bar
+    progress_bar = tqdm(total=len(filtered_questions), desc="Evaluating Questions")
+
+    for question_data in filtered_questions:
+        question_id = question_data['id_question']
+        question_text = question_data['question']
+        # expected_answer = question_data.get('expected_answer', "No answer provided.")
+
+        # Construct the prompt for the LLM
+        prompt_eval = f"""Evaluate the following question based on the criteria below and provide a score (1-5) for each:
+        1. Clarity:
+        - Is the question clearly phrased and easy to understand?
+        - Avoid vague, ambiguous, or overly complex questions.
+        2. Specificity:
+        - Does the question require detailed, precise, and focused answers?
+        - Avoid overly broad or generic questions.
+        3. Relevance:
+        - Does the question align with the context or task it pertains to?
+        - Ensure the question matches the intended dataset or domain.
+
+        Question: {question_text}
+        """
+
+        # Call GPT API to get scores
+        response = call_gpt_api_with_multiple_images(
+            instructions="You are an AI assistant with expertise in technical and regulatory topics related to building efficiency and funding in Germany. Evaluate the question on clarity, relevance, and specificity. The questions are related to the BEG program, addressing different aspects of funding, eligibility, and technical standards.",
+            prompt=prompt_eval,
+            max_tokens=500,
+            response_format=scoreQuestion
+        )
+
+        # Parse the response
+        answer = json.loads(response)
+        clarity = answer['clarity']
+        specificity = answer['specificity']
+        relevance = answer['relevance']
+
+        # Update the database with the scores
+        sql_con.update_record(
+            table_name=qas_table,
+            update_data={
+                'clarity_q': clarity,
+                'specificity_q': specificity,
+                'relevance_q': relevance
+            },
+            conditions={'id_question': question_id}
+        )
+
+        # Debug print the processed question and scores (optional)
+        # print(f"Processed Question ID {question_id}, Scores: Clarity={clarity}, Specificity={specificity}, Relevance={relevance}")
+
+        # Update progress bar
+        progress_bar.update(1)
+
+    # Close the progress bar
+    progress_bar.close()
+
+    print(f"All {len(filtered_questions)} questions have been evaluated and updated.")
+
+def select_valid_questions(sql_con, qas_table):
+    """
+    Select valid questions based on score criteria and mark them as valid in the database.
+
+    Args:
+        sql_con: Database connection object.
+        qas_table: Name of the questions table in the database.
+    """
+    # Step 1: Retrieve all questions from the database
+    questions = sql_con.get_all_records_as_dict(qas_table)
+
+    # Initialize a list to track valid question IDs
+    valid_question_ids = []
+
+    for question in questions:
+        question_id = question['id_question']
+
+        # Handle None values by treating them as 0
+        clarity = question.get('clarity', 0) or 0
+        specificity = question.get('specificity', 0) or 0
+        clarity_q = question.get('clarity_q', 0) or 0
+        specificity_q = question.get('specificity_q', 0) or 0
+
+        # Step 2: Apply selection criteria
+        if (clarity + clarity_q > 8) and (specificity + specificity_q > 8):
+            valid_question_ids.append(question_id)
+
+    # Step 3: Update the database for valid questions
+    for question_id in valid_question_ids:
+        sql_con.update_record(
+            table_name=qas_table,
+            update_data={'valid': True},
+            conditions={'id_question': question_id}
+        )
+
+    print(f"{len(valid_question_ids)} questions marked as valid.")
+
 
