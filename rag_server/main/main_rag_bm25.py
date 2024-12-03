@@ -800,18 +800,33 @@ def ask_question_with_context_json(conversation,question,context):
     # try:
     conversation,ask,prompt = add_question_context(conversation,question,context)
     if ask:
-        
-        response = openai.beta.chat.completions.parse(
-            model="gpt-4o-2024-08-06",  # Change this to the desired model (e.g., "davinci" or "curie")
-            messages=conversation,
-            max_tokens=4000,
-            response_format = Rag_reponse  # Adjust the maximum number of tokens for the response
-        )
-        
-        tokens_used = response.usage
-        tokens_used = {"completion_tokens": tokens_used.completion_tokens, "prompt_tokens": tokens_used.prompt_tokens, "total_tokens": tokens_used.total_tokens}
+        retries = 0
+        noneAnswer = True
+        retries_max = 3
+        while retries < retries_max and noneAnswer:
+            response = openai.beta.chat.completions.parse(
+                model="gpt-4o-2024-08-06",  # Change this to the desired model (e.g., "davinci" or "curie")
+                messages=conversation,
+                max_tokens=4000,
+                response_format = Rag_reponse  # Adjust the maximum number of tokens for the response
+            )
+            
+            tokens_used = response.usage
+            tokens_used = {"completion_tokens": tokens_used.completion_tokens, "prompt_tokens": tokens_used.prompt_tokens, "total_tokens": tokens_used.total_tokens}
 
-        answer = clean_and_normalize_response(response.choices[0].message.content)
+            answer = response.choices[0].message.content
+            retries+=1
+            if answer:
+                print(retries)
+                retries = 5
+                noneAnswer = False
+            else:
+                if retries == retries_max:
+                    print(retries)
+                    answer = ""
+                    noneAnswer = False
+
+        answer = clean_and_normalize_response(answer)
         
         answer = parse_rag_response_to_dict(answer)
         rag_answer = answer["answer"]
