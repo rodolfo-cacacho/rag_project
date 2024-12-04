@@ -397,17 +397,18 @@ def preprocess_user_query(user_chat, query, alt_queries=GEN_PROMPTS):
         
         return key_terms
     
-    def generate_alternate_queries(query, alt_queries):
+    def generate_alternate_queries(query,intent, alt_queries):
         instructions = f"""Generate {alt_queries} alternate queries in German, using synonyms, varied sentence structures, and maintaining the original intent of the query. The queries should be optimized for retrieving information from the BEG (Bundesförderung für effiziente Gebäude) document corpus, which focuses on sustainability and energy efficiency in buildings in Germany.
 
         Ensure that:
         1. All alternate queries remain in German.
         2. Synonyms and variations reflect terms and structures commonly used in the context of the BEG corpus.
         3. The original intent and clarity of the query are preserved.
+        4. Make sure the queries are diverse and provide unique information.
 
         Output:
         - {alt_queries} alternate queries in German."""
-        prompt = f"Base query: {query}"
+        prompt = f"Base query: {query} \nQuery intent: {intent}"
         response = call_gpt_api_with_single_prompt(instructions=instructions, prompt=prompt, response_format=alternativeQueriesFormat)
 
         answer = json.loads(response)
@@ -423,7 +424,7 @@ def preprocess_user_query(user_chat, query, alt_queries=GEN_PROMPTS):
         Rules:
         1. Analyze the user’s query for explicit or implicit temporal references (e.g., “in 2022,” “as of March 2020”).
         2. Identify the timeframe the user is asking about, focusing on when they want information (not when the document was created or cited).
-        3. Exclude dates that are part of document citations or standards (e.g., “DIN 4108-2: 2013-02”) unless explicitly mentioned as the user’s timeframe of interest.
+        3. Exclude dates that are part of document citations or standards (e.g., “DIN 4108-2: 2013-02”,"DIN V 4108-7: 2011-01") unless explicitly mentioned as the user’s timeframe of interest.
         4. If the query mentions a past date or time:
         - Infer the date as the **last day** of the mentioned month or year.
         - Format the date as `dd/mm/yyyy`.
@@ -445,7 +446,7 @@ def preprocess_user_query(user_chat, query, alt_queries=GEN_PROMPTS):
     rephrased_query,q_intent = rephrase_and_identify_intent(query)
 
     key_terms = extract_key_terms(query)
-    alt_queries_a = generate_alternate_queries(rephrased_query, alt_queries)
+    alt_queries_a = generate_alternate_queries(rephrased_query,q_intent, alt_queries)
     retrieved_date = extract_and_validate_date(query)
 
     if retrieved_date:
@@ -933,12 +934,12 @@ def ask_question_with_context_json(conversation,question,context):
             answer = response.choices[0].message.content
             retries+=1
             if answer:
-                print(retries)
+                # print(retries)
                 retries = 5
                 noneAnswer = False
             else:
                 if retries == retries_max:
-                    print(retries)
+                    # print(retries)
                     answer = ""
                     noneAnswer = False
 
@@ -1271,6 +1272,7 @@ def echo_all(message,user_chat):
                                             message_bot_content="War das eine gute Antwort?",
                                             user_chat=user_chat,
                                             reply_markup=gen_markup_evaluate())
+            
             related_mids.append(quality_resp[0].id)
         
             prompt_id = user_chat.add_prompt(question = input_text,
