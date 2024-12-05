@@ -3,31 +3,35 @@
 MAX_TOKENS = 500
 SUFFIX = 'clean'
 
-
 EMBEDDING_MODELS = {
     "jinaai/jina-embeddings-v2-base-de":{"dimension":768,
                                          "embed_task":None,
                                          "retrieve_task":None,
-                                         "api_usage":False},
+                                         "api_usage":False,
+                                         "instruction":None},
     "jinaai/jina-embeddings-v3":{"dimension":1024,
                                  "embed_task":"retrieval.passage",
                                  "retrieve_task":"retrieval.query",
-                                 "api_usage":False},
+                                 "api_usage":False,
+                                 "instruction":None},
     "aari1995/German_Semantic_V3":{"dimension":1024,
                                    "embed_task":None,
                                    "retrieve_task":None,
-                                   "api_usage":False},
+                                   "api_usage":False,
+                                   "instruction":None},
     "intfloat/multilingual-e5-large-instruct":{"dimension":1024,
                                    "embed_task":None,
                                    "retrieve_task":None,
-                                   "api_usage":False}}
+                                   "api_usage":False,
+                                   "instuction":"Given a query, retrieve relevant information from the available documents"}}
 
-EMBEDDING_MODEL = "jinaai/jina-embeddings-v2-base-de"
+EMBEDDING_MODEL = "aari1995/German_Semantic_V3"
 EMBEDDING_MODEL_NAME = EMBEDDING_MODEL.split("/")[1].replace('_','-').lower()
 EMBEDDING_MODEL_DIM = EMBEDDING_MODELS[EMBEDDING_MODEL]["dimension"]
 EMBEDDING_MODEL_API = EMBEDDING_MODELS[EMBEDDING_MODEL]["api_usage"]
 EMBEDDING_MODEL_RET_TASK = EMBEDDING_MODELS[EMBEDDING_MODEL]["retrieve_task"]
 EMBEDDING_MODEL_EMB_TASK = EMBEDDING_MODELS[EMBEDDING_MODEL]["embed_task"]
+EMBEDDING_MODEL_INSTRUCTION = EMBEDDING_MODELS[EMBEDDING_MODEL]["instruction"]
  
 INDEX_NAME = f'{EMBEDDING_MODEL_NAME}-{SUFFIX}-{MAX_TOKENS}'
 

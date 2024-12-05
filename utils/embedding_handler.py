@@ -23,20 +23,39 @@ class EmbeddingHandler:
             self.model_name = "API"
             self.model_dimension = None  # Can set this dynamically if API provides it.
 
-    def embed_texts(self, texts, task=None):
+    def get_detailed_instruct(self, task_description, query):
+        """
+        Formats the instruction and query for models that require a specific input structure.
+
+        Args:
+            task_description (str): The task description to prepend.
+            query (str): The actual query text.
+
+        Returns:
+            str: Formatted instruction and query.
+        """
+        return f'Instruct: {task_description}\nQuery: {query}'
+
+    def embed_texts(self, texts, task=None, instruction=None):
         """
         Embeds texts using the specified method (API or transformer model).
         
         Args:
             texts (list): List of strings to embed.
             task (str): Task to specify for models supporting tasks like "retrieval.query".
-        
+            instruction (str): Optional instruction to prepend to each query.
+
         Returns:
             list: List of embeddings, with all values as Python floats.
         """
         if self.use_api:
             if not self.api_function:
                 raise ValueError("API function must be defined for API embedding.")
+            
+            # Add instruction if provided
+            if instruction:
+                texts = [self.get_detailed_instruct(instruction, text) for text in texts]
+            
             return [[float(value) for value in self.api_function(text)] for text in texts]
 
         if not self.embedding_model:
@@ -44,6 +63,10 @@ class EmbeddingHandler:
         
         # Use task from the class or the passed argument
         task_to_use = task or self.task
+
+        # Add instruction if provided
+        if instruction:
+            texts = [self.get_detailed_instruct(instruction, text) for text in texts]
 
         if task_to_use:
             # Encode with task-specific arguments

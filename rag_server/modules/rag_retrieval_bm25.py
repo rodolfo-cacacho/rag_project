@@ -289,7 +289,8 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
                      vocab_table,query,gen_prompts,
                      keyterms,max_results,retrieve_date_documents,
                      max_results_query,nlp,
-                     distance_threshold = 0.5):
+                     distance_threshold = 0.5,
+                     instruction_retrieve = None):
     
     distance_threshold = 0
 
@@ -323,7 +324,8 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
     # print("Sparse vectors done")
 
     dense_vectors = embed_handler.embed_texts(texts = queries,
-                                              task = embed_task)
+                                              task = embed_task,
+                                              instruction = instruction_retrieve)
     # print("Dense vectors done")
 
     results_dict = {}

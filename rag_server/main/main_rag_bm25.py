@@ -42,6 +42,7 @@ from config import (DB_NAME,CONFIG_SQL_DB,METADATA_FILE_PATH,BOT_NAME,
                     SQL_CHUNK_TABLE,SQL_VOCAB_BM25_TABLE,
                     MAX_TOKENS,SUFFIX,INDEX_NAME,
                     EMBEDDING_MODEL,EMBEDDING_MODEL_API,EMBEDDING_MODEL_DIM,EMBEDDING_MODEL_RET_TASK,
+                    EMBEDDING_MODEL_INSTRUCTION,
                     ALPHA_VALUE,GEN_PROMPTS,
                     SQL_USER_TABLE_SCHEMA,SQL_USER_TABLE,
                     SQL_MESSAGES_TABLE,SQL_MESSAGES_TABLE_SCHEMA,
@@ -1249,7 +1250,8 @@ def echo_all(message,user_chat):
                 vocab_table = SQL_VOCAB_BM25_TABLE,
                 alpha_value=ALPHA_VALUE,
                 embed_handler=embed_handler,
-                nlp=nlp
+                nlp=nlp,
+                instruction_retrieve=EMBEDDING_MODEL_INSTRUCTION
                 )
 
             results = build_context(results,sql_db_connector,SQL_CHUNK_TABLE)
