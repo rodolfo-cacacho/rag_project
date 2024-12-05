@@ -326,6 +326,13 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
     dense_vectors = embed_handler.embed_texts(texts = queries,
                                               task = embed_task,
                                               instruction = instruction_retrieve)
+    # Print the embeddings
+    print("\nGenerated Embeddings:")
+    for i, embedding in enumerate(dense_vectors):
+        print(f"Query: {queries[i]}")
+        print(f"Embedding: {embedding[:10]}... (truncated)")  # Print first 10 values of the embedding
+        print(f"Embedding Length: {len(embedding)}")
+    
     # print("Dense vectors done")
 
     results_dict = {}
@@ -358,6 +365,7 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
     # Step 2: Normalize scores
     # Flatten all scores to find the global min and max
     all_scores = [score for scores in results_dict.values() for score in scores]
+    print(f"Scores: {len(all_scores)}")
     global_min_score = min(all_scores)
     global_max_score = max(all_scores)
 
