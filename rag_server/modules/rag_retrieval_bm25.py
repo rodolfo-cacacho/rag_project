@@ -364,6 +364,7 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
 
     # Step 2: Normalize scores
     # Flatten all scores to find the global min and max
+    print(results_dict)
     all_scores = [score for scores in results_dict.values() for score in scores]
     print(f"Scores: {len(all_scores)}")
     global_min_score = min(all_scores)
