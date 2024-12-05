@@ -23,7 +23,7 @@ EMBEDDING_MODELS = {
                                    "embed_task":None,
                                    "retrieve_task":None,
                                    "api_usage":False,
-                                   "instuction":"Given a query, retrieve relevant information from the available documents"}}
+                                   "instruction":"Given a query, retrieve relevant information from the available documents"}}
 
 EMBEDDING_MODEL = "intfloat/multilingual-e5-large-instruct"
 EMBEDDING_MODEL_NAME = EMBEDDING_MODEL.split("/")[1].replace('_','-').lower()
