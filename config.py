@@ -1,6 +1,6 @@
 # RAG CONFIGURATIONS
 
-MAX_TOKENS = 500
+MAX_TOKENS = 250
 SUFFIX = 'clean'
 
 EMBEDDING_MODELS = {
@@ -8,30 +8,35 @@ EMBEDDING_MODELS = {
                                          "embed_task":None,
                                          "retrieve_task":None,
                                          "api_usage":False,
-                                         "instruction":None},
+                                         "instruction":None,
+                                         "normalize":False},
     "jinaai/jina-embeddings-v3":{"dimension":1024,
                                  "embed_task":"retrieval.passage",
                                  "retrieve_task":"retrieval.query",
                                  "api_usage":False,
-                                 "instruction":None},
+                                 "instruction":None,
+                                 "normalize":False},
     "aari1995/German_Semantic_V3":{"dimension":1024,
                                    "embed_task":None,
                                    "retrieve_task":None,
                                    "api_usage":False,
-                                   "instruction":None},
+                                   "instruction":None,
+                                   "normalize":False},
     "intfloat/multilingual-e5-large-instruct":{"dimension":1024,
                                    "embed_task":None,
                                    "retrieve_task":None,
                                    "api_usage":False,
-                                   "instruction":"Given a query, retrieve relevant information from the available documents"}}
+                                   "instruction":"Given a query, retrieve relevant information from the available documents",
+                                   "normalize":True}}
 
-EMBEDDING_MODEL = "jinaai/jina-embeddings-v2-base-de"
+EMBEDDING_MODEL = "intfloat/multilingual-e5-large-instruct"
 EMBEDDING_MODEL_NAME = EMBEDDING_MODEL.split("/")[1].replace('_','-').lower()
 EMBEDDING_MODEL_DIM = EMBEDDING_MODELS[EMBEDDING_MODEL]["dimension"]
 EMBEDDING_MODEL_API = EMBEDDING_MODELS[EMBEDDING_MODEL]["api_usage"]
 EMBEDDING_MODEL_RET_TASK = EMBEDDING_MODELS[EMBEDDING_MODEL]["retrieve_task"]
 EMBEDDING_MODEL_EMB_TASK = EMBEDDING_MODELS[EMBEDDING_MODEL]["embed_task"]
 EMBEDDING_MODEL_INSTRUCTION = EMBEDDING_MODELS[EMBEDDING_MODEL]["instruction"]
+EMBEDDING_MODEL_NORMALIZE = EMBEDDING_MODELS[EMBEDDING_MODEL]["normalize"]
  
 INDEX_NAME = f'{EMBEDDING_MODEL_NAME}-{SUFFIX}-{MAX_TOKENS}'
 
@@ -210,4 +215,14 @@ TEST_RESULTS_SCHEMA = {
     "status": "ENUM('pending', 'success', 'error') DEFAULT 'pending'",
     "error_message": "TEXT",
     "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",
+}
+
+TEST_GEN_ANSWERS_TABLE = "test_gen_answers"
+
+TEST_GEN_ANSWERS_SCHEMA = {
+    "id": "INT AUTO_INCREMENT PRIMARY KEY",
+    "test_name":"VARCHAR(255)",
+    "id_question":"INT",
+    "score":"INT",
+    "comment":"longtext"
 }

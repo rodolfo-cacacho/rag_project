@@ -56,6 +56,10 @@ class PineconeDBConnectorHybrid:
         Returns:
             dict: Query results from Pinecone.
         """
+        if not query_embedding_sparse or not query_embedding_sparse.get("values"):
+            # If the sparse vector is empty, pass None
+            query_embedding_sparse = None
+
         query_result = self.index.query(
             vector=query_embedding_dense,
             sparse_vector=query_embedding_sparse,

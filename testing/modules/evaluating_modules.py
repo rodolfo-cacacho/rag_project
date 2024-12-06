@@ -1,7 +1,7 @@
 from collections import defaultdict
 from dotenv import load_dotenv
 from tqdm import tqdm
-import numpy as np
+import json
 import pandas as pd
 
 class RAGEvaluator:
@@ -80,17 +80,20 @@ class RAGEvaluator:
     
     def generate_report(self):
 
-
-
         avg_prompt_tokens = self.data_df['prompt_tokens'].mean()
         avg_answer_tokens = self.data_df['completion_tokens'].mean()
 
         std_prompt_tokens = self.data_df['prompt_tokens'].std()
         std_answer_tokens = self.data_df['completion_tokens'].std()
 
-        
+        avg_proc_time = (self.data_df['end_date'] - self.data_df['begin_date']).mean()
+        std_proc_time = (self.data_df['end_date'] - self.data_df['begin_date']).std()
 
+        used_n_exp,used_exp,ret_n_exp,ret_exp,dif_ids_avg = self.evaluate_context()
+        total_Qs = len(self.data_df)
         report = {
+            'totalQs':total_Qs,
+            'difRetChunks':dif_ids_avg,
             'prompt_tokens':{
                 'mean':avg_prompt_tokens,
                 'std':std_prompt_tokens
@@ -98,7 +101,90 @@ class RAGEvaluator:
             'answer_tokens':{
                 'mean':avg_answer_tokens,
                 'std':std_answer_tokens
+            },
+            'retrieval_accuracy':{
+                'selected':used_n_exp,
+                'retrieved':ret_n_exp
+            },
+            'retrieval_accuracy_exp':{
+                'selected':used_exp,
+                'retrieved':ret_exp
+            },
+            'processing_time':{
+                'mean':avg_proc_time.total_seconds(),
+                'std':std_proc_time.total_seconds()
             }
         }
 
         return report
+    
+    def get_adj_ids(self,id, last_id, dif=1):
+        """
+        Get all adjacent IDs within a given difference from the original ID.
+        
+        Args:
+            id (str): The current ID in the format "base.cid".
+            last_id (str): The last ID in the format "base.lid".
+            dif (int): The difference to consider for adjacent IDs.
+
+        Returns:
+            list: A list of adjacent IDs within the specified range.
+        """
+        adjs_ids = []
+
+        # Split and parse the base and numeric parts
+        base, cid = id.split('.')
+        _, lid = last_id.split('.')
+
+        # Convert to integers
+        cid = int(cid)
+        lid = int(lid)
+
+        # Generate all IDs within the range [cid-dif, cid+dif]
+        for offset in range(-dif, dif + 1):
+            adj_cid = cid + offset
+            # Ensure IDs are within bounds and not the original ID
+            if 0 <= adj_cid <= lid and adj_cid != cid:
+                adjs_ids.append(f"{base}.{adj_cid}")
+
+        return adjs_ids
+
+
+    def evaluate_context(self):
+
+        used_count = 0
+        retrieved_count = 0
+
+        used_exp_count = 0
+        retrieved_exp_count = 0
+        total_ids_retrieved_ct = 0
+
+        for index,row in self.data_df.iterrows():
+            metadata = json.loads(row['metadata'])
+            end_chunk = metadata['last_id']
+            context_ids = json.loads(row['context_ids'])
+            total_context_ids = json.loads(row['context_ids_total'])
+            total_ids_retrieved_ct += len(total_context_ids)
+            original_chunk_id = row['id']
+            adj_context = self.get_adj_ids(original_chunk_id,end_chunk,dif=1)
+            adj_context.append(original_chunk_id)
+            used_context = original_chunk_id in context_ids
+            retrieved_context = original_chunk_id in total_context_ids
+            
+            used_context_ext = any(item in adj_context for item in context_ids) 
+            retrieved_context_ext = any(item in adj_context for item in total_context_ids)
+
+            used_count+=used_context
+            retrieved_count+=retrieved_context
+            used_exp_count+=used_context_ext
+            retrieved_exp_count+=retrieved_context_ext
+
+        used_n_exp = used_count/len(self.data_df)
+        used_exp = used_exp_count/len(self.data_df)
+
+        ret_n_exp = retrieved_count/len(self.data_df)
+        ret_exp = retrieved_exp_count/len(self.data_df)
+
+        total_ids_retrieved_avg = total_ids_retrieved_ct/len(self.data_df)
+
+        return used_n_exp,used_exp,ret_n_exp,ret_exp,total_ids_retrieved_avg

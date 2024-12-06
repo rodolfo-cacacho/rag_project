@@ -272,17 +272,14 @@ def bm25_query_vectors(queries, vocab_dict,nlp, k1=1.5, similarity_threshold=0.9
     return sparse_vectors
 
 
-def hybrid_scale(dense, sparse, alpha: float = 1.0):
-    # check alpha value is in range
-    if alpha < 0 or alpha > 1:
-        raise ValueError("Alpha must be between 0 and 1")
-    # scale sparse and dense vectors to create hybrid search vecs
-    hsparse = {
-        'indices': sparse["indices"],
-        'values':  [val * (1 - alpha) for val in sparse["values"]]
-    }
-    hdense = [val * alpha for val in dense]
-    return hdense, hsparse
+def hybrid_scale(dense, sparse, alpha = 1.0):
+    if sparse is None or not sparse.get("values"):
+        return dense, None  # Ensure sparse is None if empty
+
+    # Scale the dense and sparse vectors
+    dense_scaled = [alpha * v for v in dense]
+    sparse_scaled = {"indices": sparse["indices"], "values": [alpha * v for v in sparse["values"]]}
+    return dense_scaled, sparse_scaled
 
 def retrieve_context(vector_db_connector,sql_connector,embed_handler,
                      embed_task,sql_table,alpha_value,
@@ -326,13 +323,7 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
     dense_vectors = embed_handler.embed_texts(texts = queries,
                                               task = embed_task,
                                               instruction = instruction_retrieve)
-    # Print the embeddings
-    print("\nGenerated Embeddings:")
-    for i, embedding in enumerate(dense_vectors):
-        print(f"Query: {queries[i]}")
-        print(f"Embedding: {embedding[:10]}... (truncated)")  # Print first 10 values of the embedding
-        print(f"Embedding Length: {len(embedding)}")
-    
+   
     # print("Dense vectors done")
 
     results_dict = {}
@@ -364,9 +355,8 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
 
     # Step 2: Normalize scores
     # Flatten all scores to find the global min and max
-    print(results_dict)
     all_scores = [score for scores in results_dict.values() for score in scores]
-    print(f"Scores: {len(all_scores)}")
+
     global_min_score = min(all_scores)
     global_max_score = max(all_scores)
 

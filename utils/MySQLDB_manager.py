@@ -70,18 +70,32 @@ class MySQLDB:
 
         self.conn.commit()
     
-    def insert_record(self, table_name, record):
+    def insert_record(self, table_name, record, overwrite=False):
         """
-        Inserts a single record into the specified table.
+        Inserts a single record into the specified table. Optionally overwrites if a record with the same key exists.
 
         :param table_name: Name of the table.
         :param record: A dictionary where keys are column names and values are the data to insert.
+        :param overwrite: If True, overwrites existing records with the same key. Defaults to False.
         """
         columns = ', '.join(record.keys())
         placeholders = ', '.join(['%s'] * len(record))
         values = tuple(record.values())
+
+        if overwrite:
+            # Use ON DUPLICATE KEY UPDATE to overwrite existing records
+            update_clause = ', '.join([f"{col} = VALUES({col})" for col in record.keys()])
+            query = f"""
+                INSERT INTO {table_name} ({columns})
+                VALUES ({placeholders})
+                ON DUPLICATE KEY UPDATE {update_clause}
+            """
+        else:
+            # Regular INSERT, will raise an error if a duplicate key exists
+            query = f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})"
+
         self.cursor.execute(f"USE {self.database_name}")
-        self.cursor.execute(f"INSERT INTO {table_name} ({columns}) VALUES ({placeholders})", values)
+        self.cursor.execute(query, values)
         self.conn.commit()
         return self.cursor.lastrowid
 

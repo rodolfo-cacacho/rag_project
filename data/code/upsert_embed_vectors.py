@@ -23,7 +23,7 @@ nlp = spacy.load('de_core_news_lg')
 load_dotenv()
 API_PINE_CONE = os.getenv('API_PINE_CONE')
 
-MAX_TOKENS = 125
+MAX_TOKENS = 250
 sql_con = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
 sql_chunks_table = f'chunks_table_{SUFFIX}_{MAX_TOKENS}'
@@ -53,6 +53,7 @@ for idx_model,embedding_model in enumerate(EMBEDDING_MODELS):
     embedding_model_api = EMBEDDING_MODELS[embedding_model]["api_usage"]
     embedding_model_ret_task = EMBEDDING_MODELS[embedding_model]["retrieve_task"]
     embedding_model_emb_task = EMBEDDING_MODELS[embedding_model]["embed_task"]
+    embedding_model_normalize = EMBEDDING_MODELS[embedding_model]["normalize"]
 
     index_name = f'{embedding_model_name}-{SUFFIX}-{MAX_TOKENS}'
 
@@ -71,5 +72,6 @@ for idx_model,embedding_model in enumerate(EMBEDDING_MODELS):
                    embedding_handler=embedding_handler,
                    use_sparse=True,
                    batch_size_embedding=16,
-                   batch_size_upsert=16
+                   batch_size_upsert=16,
+                   normalize_model= embedding_model_normalize
                    )

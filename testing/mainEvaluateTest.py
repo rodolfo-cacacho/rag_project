@@ -18,9 +18,8 @@ from config import (CONFIG_SQL_DB,DB_NAME,
                     SQL_PROMPTS_TABLE)
 from utils.MySQLDB_manager import MySQLDB
 from testing.modules.evaluating_modules import RAGEvaluator
-from utils.embedding_handler import EmbeddingHandler
 
-TEST_NAME = "testJinaDE250"
+TEST_NAME = "testJinaV3500"
 
 sql_con = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
@@ -33,8 +32,5 @@ ragEval = RAGEvaluator(sql_con=sql_con,
 
 df_results = ragEval.data_df
 
-print(df_results.head(5))
-print(df_results.columns)
-print(df_results.shape)
 
 print(ragEval.generate_report())

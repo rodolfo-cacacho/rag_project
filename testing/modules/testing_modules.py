@@ -12,6 +12,8 @@ from dotenv import load_dotenv
 from tqdm import tqdm
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+import pandas as pd
+import re
 
 # Set the seed
 seed_value = 15
@@ -761,4 +763,127 @@ def select_valid_questions(sql_con, qas_table):
 
     print(f"{len(valid_question_ids)} questions marked as valid.")
 
+
+
+def evaluate_questions(sql_con, qas_table, test_results_table,test_answers_table,test_answers_schema,prompts_table,rubric, overwrite=False):
+    """
+    Evaluate questions using clarity, specificity, and relevance criteria, and update scores in the database.
+
+    Args:
+        sql_con: SQL connector instance.
+        qas_table: Name of the table containing questions to be evaluated.
+        overwrite: Whether to overwrite existing scores (default: False).
+    """
+    class ScoreQuestion(BaseModel):
+        score: int
+        comment: str
+    # Regular expression to match the pattern
+    pattern = r"\(Stand \d{2}/\d{2}/\d{4}\)"
+   
+    ret_cols_results_table = ['id','id_question','prompt_id','device','test_name']
+    conditions_results_table = {
+        'status':'success'
+    }
+
+    results_table = sql_con.get_records(test_results_table,ret_cols_results_table,conditions_results_table)
+
+    results_df = pd.DataFrame(results_table)
+
+    prompts_ids = [i['prompt_id'] for i in results_table]
+
+    ret_cols_prompts_table = ['prompt_id','device','answer']
+    conditions_prompts_table={
+        'prompt_id':prompts_ids
+    }
+
+    prompts = sql_con.get_records(prompts_table,ret_cols_prompts_table,conditions_prompts_table)
+
+    prompts_df = pd.DataFrame(prompts)
+    prompts_df['device'] = prompts_df['device'].str.lower()
+
+    ret_cols_qas = ['id_question','question','expected_answer']
+    conditions_qas = {
+        'valid':1
+    }
+
+    questions = sql_con.get_records(qas_table,ret_cols_qas,conditions_qas)
+    questions_df = pd.DataFrame(questions)
+
+    results_df = pd.merge(results_df,questions_df,how='inner',on='id_question')
+    results_df = pd.merge(results_df,prompts_df,how='inner',on=['prompt_id','device'])
+
+    sql_con.create_table(test_answers_table, test_answers_schema)
+    
+    questions_gen = sql_con.get_all_records_as_dict(test_answers_table)
+
+    eval_questions = []
+    if questions_gen:
+        eval_questions = [i['id'] for i in questions_gen]
+
+    if not overwrite:
+        # Filter the DataFrame to exclude rows with ids in the list
+        results_df = results_df[~results_df['id'].isin(eval_questions)]
+
+    # Evaluate remaining questions
+    with tqdm(total=len(results_df), desc="Evaluating Answers", unit="question") as pbar:
+        for _, row in results_df.iterrows():
+            id = row['id']
+            question = row['question']
+            expected_answer = row['expected_answer']
+            answer = row['answer']
+            # Remove the pattern from the string
+            answer = re.sub(pattern, "", answer).strip()
+            id_question = row['id_question']
+            test_name = row['test_name']
+
+            # Construct the evaluation prompt
+            prompt = f"""
+            Assess how well the RAG response aligns with the Expected Answer using the rubric below:
+            [Grading Rubric]
+            {rubric}
+            [End of Grading Rubric]
+            Treat the Expected Answer as definitive. Provide a score and justification. Example:
+            Score: 3, Reason: The response partially aligns but with discrepancies.
+
+            [Question]
+            {question}
+            [End of Question]
+            [Expected Answer]
+            {expected_answer}
+            [End of Expected Answer]
+            [Generated Response]
+            {answer}
+            [End of Generated Response]
+            """
+            # Call GPT API
+            try:
+                response = call_gpt_api_with_multiple_images(
+                    instructions="You are tasked with evaluating a RAG system's generated responses. Use the provided rubric to score the response based on its alignment with the Expected Answer. Focus on correctness, completeness, and honesty. Provide a concise justification for your score.",
+                    prompt=prompt,
+                    max_tokens=300,
+                    response_format=ScoreQuestion
+                )
+                answer = json.loads(response)
+                score = answer['score']
+                comment = answer['comment']
+            except Exception as e:
+                print(f"Error processing question {id}: {e}")
+                score, comment = None, None
+
+            # Update the database with scores
+            sql_con.insert_record(
+                table_name=test_answers_table,
+                record={
+                    'id': id,
+                    'test_name': test_name,
+                    'score': score,
+                    'id_question':id_question,
+                    'comment':comment
+                },overwrite = overwrite
+            )
+
+            # Update the progress bar
+            pbar.update(1)
+
+    print("Question evaluation completed.")
 

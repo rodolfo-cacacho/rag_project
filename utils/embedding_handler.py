@@ -36,7 +36,7 @@ class EmbeddingHandler:
         """
         return f'Instruct: {task_description}\nQuery: {query}'
 
-    def embed_texts(self, texts, task=None, instruction=None):
+    def embed_texts(self, texts, task=None, instruction=None,normalize = False):
         """
         Embeds texts using the specified method (API or transformer model).
         
@@ -75,13 +75,15 @@ class EmbeddingHandler:
                 task=task_to_use,
                 prompt_name=task_to_use,
                 batch_size=16,
-                show_progress_bar=False
+                show_progress_bar=False,
+                normalize_embeddings = normalize
             )
         else:
             # Default encoding without task
             embeddings = self.embedding_model.encode(
                 texts,
                 batch_size=16,
+                normalize_embeddings = normalize,
                 show_progress_bar=False
             )
 

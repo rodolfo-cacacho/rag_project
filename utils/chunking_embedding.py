@@ -902,7 +902,8 @@ def process_and_upload(
     embedding_handler,
     use_sparse=True,
     batch_size_embedding=100,
-    batch_size_upsert=25
+    batch_size_upsert=25,
+    normalize_model = False
 ):
     """
     Processes document chunks to generate embeddings and uploads them to Pinecone.
@@ -933,7 +934,7 @@ def process_and_upload(
         metadatas = [chunk['metadata'] for chunk in batch]
 
         # Step 1: Generate Dense Embeddings
-        dense_embeddings = embedding_handler.embed_texts(texts)
+        dense_embeddings = embedding_handler.embed_texts(texts,normalize = normalize_model)
 
         # Step 2: Prepare Data for Upload
         vectors_to_upload = []
