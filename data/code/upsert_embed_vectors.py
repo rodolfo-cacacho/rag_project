@@ -23,7 +23,7 @@ nlp = spacy.load('de_core_news_lg')
 load_dotenv()
 API_PINE_CONE = os.getenv('API_PINE_CONE')
 
-MAX_TOKENS = 250
+MAX_TOKENS = 500
 sql_con = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
 sql_chunks_table = f'chunks_table_{SUFFIX}_{MAX_TOKENS}'
