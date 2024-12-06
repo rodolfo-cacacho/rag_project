@@ -52,4 +52,4 @@ results = evaluate_questions(sql_con=sql_con,
                    test_answers_schema=TEST_GEN_ANSWERS_SCHEMA,
                    prompts_table=SQL_PROMPTS_TABLE,
                    rubric=rubric,
-                   overwrite=True)
+                   overwrite=False)

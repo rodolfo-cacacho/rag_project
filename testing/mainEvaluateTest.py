@@ -15,11 +15,11 @@ from config import (CONFIG_SQL_DB,DB_NAME,
                     EMBEDDING_MODEL,EMBEDDING_MODEL_API,
                     EMBEDDING_MODEL_EMB_TASK,
                     TEST_RESULTS_TABLE,SQL_EVAL_CHUNKS_TABLE,
-                    SQL_PROMPTS_TABLE)
+                    SQL_PROMPTS_TABLE,TEST_GEN_ANSWERS_TABLE)
 from utils.MySQLDB_manager import MySQLDB
 from testing.modules.evaluating_modules import RAGEvaluator
 
-TEST_NAME = "testJinaV3500"
+TEST_NAME = "testMultil250"
 
 sql_con = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
@@ -28,7 +28,8 @@ ragEval = RAGEvaluator(sql_con=sql_con,
                        test_table_name=TEST_RESULTS_TABLE,
                        qas_table_name=SQL_EVAL_QAS_TABLE,
                        chunks_eval_table_name=SQL_EVAL_CHUNKS_TABLE,
-                       prompts_table_name=SQL_PROMPTS_TABLE)
+                       prompts_table_name=SQL_PROMPTS_TABLE,
+                       eval_answers_table=TEST_GEN_ANSWERS_TABLE)
 
 df_results = ragEval.data_df
 
