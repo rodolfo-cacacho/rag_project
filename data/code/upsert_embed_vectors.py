@@ -23,7 +23,7 @@ nlp = spacy.load('de_core_news_lg')
 load_dotenv()
 API_PINE_CONE = os.getenv('API_PINE_CONE')
 
-MAX_TOKENS = 500
+MAX_TOKENS = 750
 sql_con = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
 sql_chunks_table = f'chunks_table_{SUFFIX}_{MAX_TOKENS}'
@@ -45,33 +45,35 @@ upsert_list = embedding_bm25_calculation(sql_con=sql_con,
                                         nlp=nlp)
 
 for idx_model,embedding_model in enumerate(EMBEDDING_MODELS):
-    
-    print(f"Calculating Embeddings: {embedding_model}")
-    
-    embedding_model_name = embedding_model.split("/")[1].replace('_','-').lower()
-    embedding_model_dim = EMBEDDING_MODELS[embedding_model]["dimension"]
-    embedding_model_api = EMBEDDING_MODELS[embedding_model]["api_usage"]
-    embedding_model_ret_task = EMBEDDING_MODELS[embedding_model]["retrieve_task"]
-    embedding_model_emb_task = EMBEDDING_MODELS[embedding_model]["embed_task"]
-    embedding_model_normalize = EMBEDDING_MODELS[embedding_model]["normalize"]
 
-    index_name = f'{embedding_model_name}-{SUFFIX}-{MAX_TOKENS}'
+    if embedding_model in ['jinaai/jina-embeddings-v3']:
+        
+        print(f"Calculating Embeddings: {embedding_model}")
+        
+        embedding_model_name = embedding_model.split("/")[1].replace('_','-').lower()
+        embedding_model_dim = EMBEDDING_MODELS[embedding_model]["dimension"]
+        embedding_model_api = EMBEDDING_MODELS[embedding_model]["api_usage"]
+        embedding_model_ret_task = EMBEDDING_MODELS[embedding_model]["retrieve_task"]
+        embedding_model_emb_task = EMBEDDING_MODELS[embedding_model]["embed_task"]
+        embedding_model_normalize = EMBEDDING_MODELS[embedding_model]["normalize"]
 
-    vec_con = PineconeDBConnectorHybrid(api_key=API_PINE_CONE,
-                                    index_name=index_name,
-                                    dimension=embedding_model_dim)
-    
-    embedding_handler = EmbeddingHandler(
-        model_name=embedding_model,  # Replace with your transformer model
-        use_api=False,  # Set to True if using API
-        task=embedding_model_emb_task
-    )
+        index_name = f'{embedding_model_name}-{SUFFIX}-{MAX_TOKENS}'
 
-    process_and_upload(chunks=upsert_list,
-                   pinecone_connector=vec_con,
-                   embedding_handler=embedding_handler,
-                   use_sparse=True,
-                   batch_size_embedding=16,
-                   batch_size_upsert=16,
-                   normalize_model= embedding_model_normalize
-                   )
+        vec_con = PineconeDBConnectorHybrid(api_key=API_PINE_CONE,
+                                        index_name=index_name,
+                                        dimension=embedding_model_dim)
+        
+        embedding_handler = EmbeddingHandler(
+            model_name=embedding_model,  # Replace with your transformer model
+            use_api=False,  # Set to True if using API
+            task=embedding_model_emb_task
+        )
+
+        process_and_upload(chunks=upsert_list,
+                    pinecone_connector=vec_con,
+                    embedding_handler=embedding_handler,
+                    use_sparse=True,
+                    batch_size_embedding=4,
+                    batch_size_upsert=4,
+                    normalize_model= embedding_model_normalize
+                    )

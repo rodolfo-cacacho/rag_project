@@ -62,7 +62,7 @@ class RAGEvaluator:
 
         prompt_ids = results_df['prompt_id'].tolist()
 
-        prompts_cols = ['prompt_id','device','answer','begin_date','end_date','completion_tokens','prompt_tokens',
+        prompts_cols = ['prompt_id','device','answer','begin_date','end_date','completion_tokens','prompt_tokens','chunk_size','embedding_model','alpha_value',
                         'context_used','context_ids','context_ids_total','alternate_prompts','improved_query','query_intent','keyterms']
         
         prompts_conditions = {
