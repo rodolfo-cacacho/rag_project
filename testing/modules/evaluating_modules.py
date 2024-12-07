@@ -83,7 +83,7 @@ class RAGEvaluator:
                 #     'comment':comment
                 # },overwrite = overwrite
 
-        eval_answer_cols = ['id','score','comment']
+        eval_answer_cols = ['id','score','comment','precision','recall','f1_score']
         
         eval_answer_conditions = {
             'id':id_test_questions
@@ -115,6 +115,8 @@ class RAGEvaluator:
 
         def row_metrics(row):
             metadata = json.loads(row['metadata'])
+            type = metadata['type']
+            type = 'Table' if 'table' in type.lower() else 'Text'
             end_chunk = metadata['last_id']
             context_ids = json.loads(row['context_ids'])
             total_context_ids = json.loads(row['context_ids_total'])
@@ -122,8 +124,8 @@ class RAGEvaluator:
             adj_context.append(row['id']),
             binary_score = 1 if row['score'] > 3 else 0
 
-
             return {
+                'type': type,
                 'used_context': row['id'] in context_ids,
                 'retrieved_context': row['id'] in total_context_ids,
                 'used_context_ext': any(item in adj_context for item in context_ids),

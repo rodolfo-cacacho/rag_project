@@ -15,7 +15,7 @@ from config import (CONFIG_SQL_DB,DB_NAME,
                     SQL_PROMPTS_TABLE
                     )
 from utils.MySQLDB_manager import MySQLDB
-from testing.modules.testing_modules import evaluate_questions
+from testing.modules.testing_modules import evaluate_questions,evaluate_answers_sim
 
 sql_con = MySQLDB(CONFIG_SQL_DB,DB_NAME)
 
@@ -53,3 +53,10 @@ results = evaluate_questions(sql_con=sql_con,
                    prompts_table=SQL_PROMPTS_TABLE,
                    rubric=rubric,
                    overwrite=False)
+
+evaluate_answers_sim(sql_con=sql_con,
+                     qas_table=SQL_EVAL_QAS_TABLE,
+                     test_results_table=TEST_GEN_ANSWERS_TABLE,
+                     test_answers_schema=TEST_GEN_ANSWERS_SCHEMA,
+                     prompts_table=SQL_PROMPTS_TABLE,
+                     overwrite=False)

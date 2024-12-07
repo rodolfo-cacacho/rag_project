@@ -1,6 +1,6 @@
 # RAG CONFIGURATIONS
 
-MAX_TOKENS = 750
+MAX_TOKENS = 500
 SUFFIX = 'clean'
 
 EMBEDDING_MODELS = {
@@ -45,13 +45,15 @@ DIST_THRESHOLD = 0.2
 
 MX_RESULTS_QUERY = 25
 
-ALPHA_VALUE = 0.7
+ALPHA_VALUE = 0.9
 
 GEN_PROMPTS = 3
 
 # Directory & File CONFIG
 
 METADATA_DIR = 'data/documents/metadata'
+
+RESULTS_DIR = 'results/'
 
 TABLE_STORE_DIR = 'data/storage/tables'
 
@@ -179,6 +181,7 @@ SQL_EVAL_QAS_TABLE_SCHEMA = {
     "type_question": "VARCHAR(25)",
     "question": "longtext",                      # Generated question
     "expected_answer": "longtext",                        # Expected answer (nullable)
+    "expected_answer_original": "longtext",                        # Expected answer (nullable)
     "created_at": "TIMESTAMP DEFAULT CURRENT_TIMESTAMP",  # Record creation timestamp
     "sim": "VARCHAR(500)",
     "sim_worth":"BOOLEAN DEFAULT FALSE",
@@ -224,5 +227,8 @@ TEST_GEN_ANSWERS_SCHEMA = {
     "test_name":"VARCHAR(255)",
     "id_question":"INT",
     "score":"INT",
-    "comment":"longtext"
+    "comment":"longtext",
+    "precision": "float",
+    "recall": "float",
+    "f1_score": "float"
 }

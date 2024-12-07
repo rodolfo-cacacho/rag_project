@@ -14,6 +14,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 import pandas as pd
 import re
+from bert_score import score
 
 # Set the seed
 seed_value = 15
@@ -236,7 +237,6 @@ Context:
     print("Questions generation completed.")
 
 
-
 def generate_answers(sql_con, table_eval_chunks, table_QAs):
     """
     Generate answers based on chunk content and insert them into the database.
@@ -250,7 +250,7 @@ def generate_answers(sql_con, table_eval_chunks, table_QAs):
     # Get all evaluation chunks from the database
     questions = sql_con.get_all_records_as_dict(table_QAs)
 
-    questions = [q for q in questions if q['expected_answer'] is None]
+    questions = [q for q in questions if q['expected_answer'] is None and q['valid'] == 1]
 
     # Initialize the progress bar
     with tqdm(total=len(questions), desc="Generating Answers", unit="answer") as pbar:
@@ -317,6 +317,85 @@ Generate the expected answer in **German**."""
 
             # Update the QA table with the answer
             upd_data = {'expected_answer': answer_q}
+            condition = {'id_question': id_q}
+            sql_con.update_record(table_QAs, upd_data, condition)
+
+            # Update the progress bar
+            pbar.update(1)
+
+    print("Answer generation completed.")
+
+def generate_true_answers(sql_con, table_eval_chunks, table_QAs):
+    """
+    Generate answers based on chunk content and insert them into the database.
+
+    Args:
+        sql_con: SQL connector instance.
+        table_eval_chunks: Name of the table containing evaluation chunks.
+        table_QAs: Name of the table to store generated questions.
+    """
+    ret_cols = ['doc_type', 'metadata', 'merged_content']
+    # Get all evaluation chunks from the database
+    questions = sql_con.get_all_records_as_dict(table_QAs)
+
+    questions = [q for q in questions if q['expected_answer_original'] is None and q['valid'] == 1]
+
+    # Initialize the progress bar
+    with tqdm(total=len(questions), desc="Generating Answers", unit="answer") as pbar:
+        for qa in questions:
+            question = qa["question"]
+            id_q = qa['id_question']
+            id_sample = qa["id_sample"]
+            retrieve_id = {'id_sample': id_sample}
+            doc_type, metadata, merged_content = sql_con.get_record(
+                table_eval_chunks, ret_cols, retrieve_id
+            )  # Get the associated chunk
+            metadata = json.loads(metadata)
+            paths = metadata['path']
+            pages = metadata['page']
+
+            if paths in ("", []):
+                img_paths = None
+            else:
+                img_paths = paths
+
+            content = merged_content
+
+            instructions = """You are a specialized system focused on answering questions about government financing and regulations for efficient buildings in Germany.
+            
+            1.	For each question, give your answer by providing  a specific, accurate response to the user’s query, incorporating relevant information from the provided context. For regulatory topics, explain why or when something is necessary. Include the name of the source at the end.
+            2.	Prioritize construction-related topics, particularly financing and regulations in Germany. If the question is outside your scope, politely clarify your area of expertise.
+            3.	Provide concise, accurate, and specific answers. Always include explanations for your reasoning when applicable.
+            4.	If a question is unclear, rephrase it for clarity or ask for more information, using prior exchanges when possible to guide your clarification.
+            5.	When applicable, include sources to back up your answers, ensuring they are up-to-date. If the user requests exact wording, quote directly from the source if it is available in the provided context.
+            
+            **Important: Always reply in german, be polite and use greetings to the user, trying to be friendly."""
+
+            # Prepare the prompt
+            prompt = f"""Answer the following question: {question}.
+            Use the provided context. If the question cannot be answered with the context, say you can't answer the question with the retrieved context. Clarify if the questions is outside your expertise (government financing and regulations for efficient buildings in Germany).
+            
+            1. Reply in german, be polite trying to be friendly.
+            2. Mention the source of your answer. For example: Richtlinie BEG EM,  Technische FAQ BEG, etc.
+            3. Return only the answer, stating the source used (Source, pages) following the specified format.
+            
+            Retrieved Context:
+            
+            - Document: {doc_type}, Pages: {pages}
+            - Context: {content}"""
+
+            answer = call_gpt_api_with_multiple_images(
+                instructions=instructions,
+                prompt=prompt,
+                response_format=answerFormat,
+                img_paths=img_paths,
+                max_tokens=4000
+            )
+            answer = json.loads(answer)
+            answer_q = answer['answer']
+
+            # Update the QA table with the answer
+            upd_data = {'expected_answer_original': answer_q}
             condition = {'id_question': id_q}
             sql_con.update_record(table_QAs, upd_data, condition)
 
@@ -887,3 +966,113 @@ def evaluate_questions(sql_con, qas_table, test_results_table,test_answers_table
 
     print("Question evaluation completed.")
 
+def evaluate_answers_sim(sql_con, qas_table, test_results_table, test_answers_table, test_answers_schema, prompts_table, overwrite=False):
+    """
+    Evaluate questions using BERTScore and update scores in the database.
+
+    Args:
+        sql_con: SQL connector instance.
+        qas_table: Name of the table containing questions to be evaluated.
+        overwrite: Whether to overwrite existing scores (default: False).
+    """
+    # Regular expression to match the pattern
+    pattern = r"\(Stand \d{2}/\d{2}/\d{4}\)"
+
+    ret_cols_results_table = ['id', 'id_question', 'prompt_id', 'device', 'test_name']
+    conditions_results_table = {'status': 'success'}
+
+    results_table = sql_con.get_records(test_results_table, ret_cols_results_table, conditions_results_table)
+    results_df = pd.DataFrame(results_table)
+
+    prompts_ids = [i['prompt_id'] for i in results_table]
+    ret_cols_prompts_table = ['prompt_id', 'device', 'answer']
+    conditions_prompts_table = {'prompt_id': prompts_ids}
+
+    prompts = sql_con.get_records(prompts_table, ret_cols_prompts_table, conditions_prompts_table)
+    prompts_df = pd.DataFrame(prompts)
+    prompts_df['device'] = prompts_df['device'].str.lower()
+
+    ret_cols_qas = ['id_question', 'question', 'expected_answer']
+    conditions_qas = {'valid': 1}
+    questions = sql_con.get_records(qas_table, ret_cols_qas, conditions_qas)
+    questions_df = pd.DataFrame(questions)
+
+    results_df = pd.merge(results_df, questions_df, how='inner', on='id_question')
+    results_df = pd.merge(results_df, prompts_df, how='inner', on=['prompt_id', 'device'])
+
+    sql_con.create_table(test_answers_table, test_answers_schema)
+
+    questions_gen = sql_con.get_all_records_as_dict(test_answers_table)
+    eval_questions = []
+    if questions_gen:
+        eval_questions = [i['id'] for i in questions_gen]
+
+    if not overwrite:
+        # Filter the DataFrame to exclude rows with ids in the list
+        results_df = results_df[~results_df['id'].isin(eval_questions)]
+
+    # Evaluate remaining questions
+    with tqdm(total=len(results_df), desc="Evaluating Answers", unit="question") as pbar:
+        for _, row in results_df.iterrows():
+            id = row['id']
+            question = row['question']
+            expected_answer = row['expected_answer']
+            expected_answer = basic_clean_answers(expected_answer)
+            answer = row['answer']
+            answer = basic_clean_answers(answer)
+            # Remove the pattern from the string
+            answer = re.sub(pattern, "", answer).strip()
+            id_question = row['id_question']
+            test_name = row['test_name']
+
+            # Compute BERTScore
+            try:
+                precision, recall, f1 = score(
+                    cands=[answer], refs=[expected_answer], lang="de",model_type="microsoft/deberta-xlarge-mnli"
+                )  # Adjust 'lang' for non-English texts if needed
+                precision, recall, f1 = precision.item(), recall.item(), f1.item()
+            except Exception as e:
+                print(f"Error computing BERTScore for question {id}: {e}")
+                precision, recall, f1 = None, None, None
+
+            update_data_record = {
+                    'precision': precision,
+                    'recall': recall,
+                    'f1_score': f1
+            }
+            conditions_update_record = {
+                    'id': id
+            }
+
+            # Update the database with scores
+            sql_con.update_record(
+                table_name=test_answers_table,
+                update_data=update_data_record,
+                conditions =conditions_update_record 
+            )
+
+            # Update the progress bar
+            pbar.update(1)
+
+    print("Question evaluation with BERTScore completed.")
+
+def basic_clean_answers(answer):
+    # Patterns for common polite expressions
+    patterns = [
+        r"Ich hoffe.*?(weiter!|weiter! 😊)",  # Matches sentences starting with "Ich hoffe"
+        r"Hallo!?",  # Matches variations of "Hallo!" or "Hallo"
+        r"Guten Tag!?",  # Matches "Guten Tag!"
+        r"Wenn.*?(Frage|Fragen).*?zur Verfügung[.!]?",  # Matches "Wenn ... Frage/Fragen ... zur Verfügung"
+        r"Bei.*?(Frage|Fragen).*?zur Verfügung[.!]?",  # Matches "Bei ... Frage/Fragen ... zur Verfügung"
+        r"Sollten Sie.*?stehe ich gerne zur Verfügung\.",  # Matches "Sollten Sie ... stehe ich gerne zur Verfügung"
+        r"😊",  # Matches the smiley face,
+        r"Einen schönen Tag noch!",
+    ]
+    
+    # Combine the patterns into one regex
+    combined_pattern = r"|".join(patterns)
+    
+    # Remove matched phrases from the text
+    clean_answer = re.sub(combined_pattern, "", answer, flags=re.IGNORECASE).strip()
+    
+    return clean_answer
