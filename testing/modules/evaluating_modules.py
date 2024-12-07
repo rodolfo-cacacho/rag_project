@@ -83,7 +83,7 @@ class RAGEvaluator:
                 #     'comment':comment
                 # },overwrite = overwrite
 
-        eval_answer_cols = ['id','score','comment','precision','recall','f1_score']
+        eval_answer_cols = ['id','score','comment','precisionA','recallA','f1_scoreA']
         
         eval_answer_conditions = {
             'id':id_test_questions

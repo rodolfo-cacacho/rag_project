@@ -45,7 +45,7 @@ DIST_THRESHOLD = 0.2
 
 MX_RESULTS_QUERY = 25
 
-ALPHA_VALUE = 0.9
+ALPHA_VALUE = 0.5
 
 GEN_PROMPTS = 3
 
@@ -228,7 +228,7 @@ TEST_GEN_ANSWERS_SCHEMA = {
     "id_question":"INT",
     "score":"INT",
     "comment":"longtext",
-    "precision": "float",
-    "recall": "float",
-    "f1_score": "float"
+    "precisionA": "float",
+    "recallA": "float",
+    "f1_scoreA": "float"
 }

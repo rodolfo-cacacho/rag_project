@@ -56,7 +56,8 @@ results = evaluate_questions(sql_con=sql_con,
 
 evaluate_answers_sim(sql_con=sql_con,
                      qas_table=SQL_EVAL_QAS_TABLE,
-                     test_results_table=TEST_GEN_ANSWERS_TABLE,
+                     test_results_table=TEST_RESULTS_TABLE,
+                     test_answers_table =TEST_GEN_ANSWERS_TABLE,
                      test_answers_schema=TEST_GEN_ANSWERS_SCHEMA,
                      prompts_table=SQL_PROMPTS_TABLE,
                      overwrite=False)

@@ -1005,11 +1005,11 @@ def evaluate_answers_sim(sql_con, qas_table, test_results_table, test_answers_ta
     questions_gen = sql_con.get_all_records_as_dict(test_answers_table)
     eval_questions = []
     if questions_gen:
-        eval_questions = [i['id'] for i in questions_gen]
+        eval_questions = [i['id'] for i in questions_gen if i['precisionA'] is None]
 
     if not overwrite:
         # Filter the DataFrame to exclude rows with ids in the list
-        results_df = results_df[~results_df['id'].isin(eval_questions)]
+        results_df = results_df[results_df['id'].isin(eval_questions)]
 
     # Evaluate remaining questions
     with tqdm(total=len(results_df), desc="Evaluating Answers", unit="question") as pbar:
@@ -1036,9 +1036,9 @@ def evaluate_answers_sim(sql_con, qas_table, test_results_table, test_answers_ta
                 precision, recall, f1 = None, None, None
 
             update_data_record = {
-                    'precision': precision,
-                    'recall': recall,
-                    'f1_score': f1
+                    'precisionA': precision,
+                    'recallA': recall,
+                    'f1_scoreA': f1
             }
             conditions_update_record = {
                     'id': id
