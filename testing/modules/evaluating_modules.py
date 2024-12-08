@@ -118,20 +118,26 @@ class RAGEvaluator:
             type = metadata['type']
             type = 'Table' if 'table' in type.lower() else 'Text'
             end_chunk = metadata['last_id']
+            doc_id,_ = row['id'].split('.')
             context_ids = json.loads(row['context_ids'])
             total_context_ids = json.loads(row['context_ids_total'])
+            context_ids_docs = [i.split('.')[0] for i in context_ids]
+            total_context_ids_docs = [i.split('.')[0] for i in total_context_ids]
             adj_context = get_adj_ids(row['id'], end_chunk, dif=1)
             adj_context.append(row['id']),
             binary_score = 1 if row['score'] > 3 else 0
 
             return {
                 'type': type,
+                'used_doc': doc_id in context_ids_docs,
+                'retrieved_doc': (sum(1 for item in total_context_ids_docs if item == doc_id) / len(total_context_ids_docs)),
                 'used_context': row['id'] in context_ids,
                 'retrieved_context': row['id'] in total_context_ids,
                 'used_context_ext': any(item in adj_context for item in context_ids),
                 'retrieved_context_ext': any(item in adj_context for item in total_context_ids),
                 'total_context_ids': len(total_context_ids),
-                'binary_score' : binary_score
+                'binary_score' : binary_score,
+                'score_n' : row['score']/5
             }
 
         # Apply the row-wise custom metric calculations

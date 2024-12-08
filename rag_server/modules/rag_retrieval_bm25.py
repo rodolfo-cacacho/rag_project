@@ -86,8 +86,8 @@ def get_dates_documents(input_date, date_database):
 def get_logic_date(document_class):
     
     class_new = ['Technische FAQ BEG','BMWK - FAQ BEG','Richtlinie BEG EM','FAQ BEG (EM und EH-EG)',
-                 'Förderübersicht BEG EM','Allgemeines Merkblatt zur Antragstellung','Infoblätter förderfähigen Kosten',
-                 'Liste förderfähigen Anlagen - Biomasse','Liste förderfähigen Anlagen - Wärmepumpen']
+                 'Förderübersicht BEG EM','Allgemeines Merkblatt zur Antragstellung','Infoblätter förderfähigen Kosten',
+                 'Liste förderfähigen Anlagen - Biomasse','Liste förderfähigen Anlagen - Wärmepumpen']
 
     if document_class in class_new:
         return 'latest'
@@ -297,7 +297,7 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
         dates = i['dates']
         if len(dates)>0:
             type_key = i['type_key']
-            temp_and = {"$and": [{"valid_date":{'$in':dates}},{"type_key":{'$eq':type_key}}]}
+            temp_and = {"$and": [{"valid_date":{'$in':dates}},{"doc_type":{'$eq':doc}}]}
             if len(retrieve_date_documents) > 1:
                 or_condition["$or"].append(temp_and)
             else:
