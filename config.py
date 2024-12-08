@@ -1,6 +1,6 @@
 # RAG CONFIGURATIONS
 
-MAX_TOKENS = 500
+MAX_TOKENS = 250
 SUFFIX = 'clean'
 
 EMBEDDING_MODELS = {
@@ -29,7 +29,7 @@ EMBEDDING_MODELS = {
                                    "instruction":"Given a query, retrieve relevant information from the available documents",
                                    "normalize":True}}
 
-EMBEDDING_MODEL = "jinaai/jina-embeddings-v3"
+EMBEDDING_MODEL = "aari1995/German_Semantic_V3"
 EMBEDDING_MODEL_NAME = EMBEDDING_MODEL.split("/")[1].replace('_','-').lower()
 EMBEDDING_MODEL_DIM = EMBEDDING_MODELS[EMBEDDING_MODEL]["dimension"]
 EMBEDDING_MODEL_API = EMBEDDING_MODELS[EMBEDDING_MODEL]["api_usage"]
@@ -45,7 +45,7 @@ DIST_THRESHOLD = 0.2
 
 MX_RESULTS_QUERY = 25
 
-ALPHA_VALUE = 0.5
+ALPHA_VALUE = 0.7
 
 GEN_PROMPTS = 3
 
