@@ -29,7 +29,7 @@ EMBEDDING_MODELS = {
                                    "instruction":"Given a query, retrieve relevant information from the available documents",
                                    "normalize":True}}
 
-EMBEDDING_MODEL = "aari1995/German_Semantic_V3"
+EMBEDDING_MODEL = "jinaai/jina-embeddings-v2-base-de"
 EMBEDDING_MODEL_NAME = EMBEDDING_MODEL.split("/")[1].replace('_','-').lower()
 EMBEDDING_MODEL_DIM = EMBEDDING_MODELS[EMBEDDING_MODEL]["dimension"]
 EMBEDDING_MODEL_API = EMBEDDING_MODELS[EMBEDDING_MODEL]["api_usage"]

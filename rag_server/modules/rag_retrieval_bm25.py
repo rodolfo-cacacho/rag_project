@@ -10,7 +10,7 @@ from nltk.corpus import stopwords
 from utils.document_cleaning import post_clean_document
 from utils.tokens_lemmatization import extract_tokens_lemm_stop,clean_extracted_values_to_tokens
 import Levenshtein
-
+import unicodedata
 
 nlp = spacy.load("de_core_news_lg")
 
@@ -281,6 +281,10 @@ def hybrid_scale(dense, sparse, alpha = 1.0):
     sparse_scaled = {"indices": sparse["indices"], "values": [alpha * v for v in sparse["values"]]}
     return dense_scaled, sparse_scaled
 
+def generate_variants(doc_type):
+    # Generate both NFC and NFD versions
+    return [unicodedata.normalize('NFC', doc_type), unicodedata.normalize('NFD', doc_type)]
+
 def retrieve_context(vector_db_connector,sql_connector,embed_handler,
                      embed_task,sql_table,alpha_value,
                      vocab_table,query,gen_prompts,
@@ -294,10 +298,11 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
     or_condition = {"$or": []}
     for i in retrieve_date_documents:
         doc = i['type']
+        docs = generate_variants(doc)
         dates = i['dates']
         if len(dates)>0:
             type_key = i['type_key']
-            temp_and = {"$and": [{"valid_date":{'$in':dates}},{"doc_type":{'$eq':doc}}]}
+            temp_and = {"$and": [{"valid_date":{'$in':dates}},{"doc_type":{'$in':docs}}]}
             if len(retrieve_date_documents) > 1:
                 or_condition["$or"].append(temp_and)
             else:
