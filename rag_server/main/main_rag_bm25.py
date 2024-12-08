@@ -925,7 +925,7 @@ def ask_question_with_context_json(conversation,question,context):
             response = openai.beta.chat.completions.parse(
                 model="gpt-4o-2024-08-06",  # Change this to the desired model (e.g., "davinci" or "curie")
                 messages=conversation,
-                max_tokens=6000,
+                max_tokens=6500,
                 response_format = Rag_reponse  # Adjust the maximum number of tokens for the response
             )
             
