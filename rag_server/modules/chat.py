@@ -75,8 +75,12 @@ class Chat:
         """
         if gen_prompts:
             gen_prompts = json.dumps(gen_prompts,ensure_ascii=False)
+        else:
+            gen_prompts = None
         if keyterms:
             keyterms = json.dumps(keyterms,ensure_ascii=False)
+        else:
+            keyterms = None
 
         context_string = ''
         if context is not None:

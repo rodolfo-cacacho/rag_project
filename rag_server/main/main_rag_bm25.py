@@ -399,23 +399,30 @@ def preprocess_user_query(user_chat, query, alt_queries=GEN_PROMPTS):
         return key_terms
     
     def generate_alternate_queries(query,intent, alt_queries):
-        instructions = f"""Generate {alt_queries} alternate queries in German, using synonyms, varied sentence structures, and maintaining the original intent of the query. The queries should be optimized for retrieving information from the BEG (Bundesförderung für effiziente Gebäude) document corpus, which focuses on sustainability and energy efficiency in buildings in Germany.
 
-        Ensure that:
-        1. All alternate queries remain in German.
-        2. Synonyms and variations reflect terms and structures commonly used in the context of the BEG corpus.
-        3. The original intent and clarity of the query are preserved.
-        4. Make sure the queries are diverse and provide unique information.
+        if alt_queries < 1:
 
-        Output:
-        - {alt_queries} alternate queries in German."""
-        prompt = f"Base query: {query} \nQuery intent: {intent}"
-        response = call_gpt_api_with_single_prompt(instructions=instructions, prompt=prompt, response_format=alternativeQueriesFormat)
+            return []
 
-        answer = json.loads(response)
-        alt_queries = answer.get('alternative_queries', []) or []  # Default to empty list if None
+        else:
 
-        return alt_queries
+            instructions = f"""Generate {alt_queries} alternate queries in German, using synonyms, varied sentence structures, and maintaining the original intent of the query. The queries should be optimized for retrieving information from the BEG (Bundesförderung für effiziente Gebäude) document corpus, which focuses on sustainability and energy efficiency in buildings in Germany.
+
+            Ensure that:
+            1. All alternate queries remain in German.
+            2. Synonyms and variations reflect terms and structures commonly used in the context of the BEG corpus.
+            3. The original intent and clarity of the query are preserved.
+            4. Make sure the queries are diverse and provide unique information.
+
+            Output:
+            - {alt_queries} alternate queries in German."""
+            prompt = f"Base query: {query} \nQuery intent: {intent}"
+            response = call_gpt_api_with_single_prompt(instructions=instructions, prompt=prompt, response_format=alternativeQueriesFormat)
+
+            answer = json.loads(response)
+            alt_queries = answer.get('alternative_queries', []) or []  # Default to empty list if None
+
+            return alt_queries
     
     def extract_and_validate_date(query):
         instructions = """

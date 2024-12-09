@@ -275,10 +275,15 @@ def bm25_query_vectors(queries, vocab_dict,nlp, k1=1.5, similarity_threshold=0.9
 def hybrid_scale(dense, sparse, alpha = 1.0):
     if sparse is None or not sparse.get("values"):
         return dense, None  # Ensure sparse is None if empty
+    
+    if alpha > 1.0 or alpha < 0:
+        alpha = 0.7
+
+    alpha_sparse = 1 - alpha
 
     # Scale the dense and sparse vectors
     dense_scaled = [alpha * v for v in dense]
-    sparse_scaled = {"indices": sparse["indices"], "values": [alpha * v for v in sparse["values"]]}
+    sparse_scaled = {"indices": sparse["indices"], "values": [alpha_sparse * v for v in sparse["values"]]}
     return dense_scaled, sparse_scaled
 
 def generate_variants(doc_type):
@@ -320,6 +325,9 @@ def retrieve_context(vector_db_connector,sql_connector,embed_handler,
 
     queries = [query] + gen_prompts
     # print(f"{queries} {len(queries)}")
+
+    # if keyterms:
+    #     queries = [(i + " " + " ".join(keyterms)) for i in queries]
 
     # print("Sparse vectors")
     sparse_vectors = bm25_query_vectors(queries,vocabulary_bm25,nlp=nlp)
